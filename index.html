@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LiveZon AI Cloud MCR (Secured)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <!-- Firebase SDKs (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-base: #02040a; --panel-bg: rgba(6, 10, 20, 0.9); --panel-border: rgba(0, 150, 255, 0.3);
+            --neon-blue: #00e5ff; --neon-red: #ff003c; --neon-green: #00ff66; --neon-gold: #ffd700;
+            --text-main: #e2f1f8; --text-muted: #5c7c8f;
+        }
+        
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-base); background-image: radial-gradient(circle at 50% -20%, #06152d 0%, #02040a 100%); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); background-image: radial-gradient(circle at 50% 50%, #0a192f 0%, #02040a 100%); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-box { background: var(--panel-bg); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2); backdrop-filter: blur(10px); text-align: center;}
+        .login-box h1 { font-family: 'Orbitron', sans-serif; color: #fff; margin-bottom: 30px; text-shadow: 0 0 10px var(--neon-blue);}
+        .login-box h1 span { color: var(--neon-blue); }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px; text-align: left; direction: ltr;}
+        .login-box input:focus { outline: none; border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+        .login-box .btn-login { width: 100%; background: rgba(0, 229, 255, 0.2); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-weight: bold; font-size: 16px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
+        .login-box .btn-login:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue);}
+        .login-error { color: var(--neon-red); margin-top: 15px; font-size: 14px; font-weight: bold; display: none; }
+
+        #appContainer { display: none; width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
+        
+        .header { width: 100%; max-width: 1600px; display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg); padding: 15px 20px; border-radius: 12px; border: 1px solid var(--panel-border); box-shadow: 0 0 20px rgba(0, 229, 255, 0.1); margin-bottom: 15px; backdrop-filter: blur(10px); box-sizing: border-box; flex-wrap: wrap; gap: 15px;}
+        .logo-area h1 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: clamp(20px, 4vw, 26px); color: #fff; text-shadow: 0 0 10px var(--neon-blue); display: flex; align-items: center; gap: 10px;}
+        .logo-area span { color: var(--neon-blue); }
+        
+        .status-radar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;}
+        .cloud-sync { color: var(--text-muted); font-size: 20px; transition: 0.3s; }
+        .cloud-sync.synced { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+        .cloud-sync.syncing { color: var(--neon-gold); animation: pulse 1s infinite; }
+        
+        .uptime-tracker { font-family: 'Orbitron', monospace; font-size: clamp(14px, 3vw, 18px); font-weight: bold; color: var(--neon-gold); border: 1px solid var(--neon-gold); padding: 5px 10px; border-radius: 4px; background: rgba(255, 215, 0, 0.1); text-shadow: 0 0 5px var(--neon-gold); display: none; }
+        .air-status { background: rgba(255,0,60,0.1); color: var(--neon-red); padding: 8px 15px; border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: clamp(12px, 3vw, 16px); font-weight: 900; border: 1px solid var(--neon-red); letter-spacing: 2px; transition: 0.3s; }
+        .air-status.live { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); animation: pulse-red 1s infinite; }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        
+        .injector-bar { width: 100%; max-width: 1600px; background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 10px 15px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-sizing: border-box; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); }
+        .injector-bar input { flex: 1; min-width: 250px; background: #000; border: 1px solid rgba(0, 229, 255, 0.3); color: var(--neon-blue); padding: 12px; border-radius: 4px; font-family: monospace; font-size: 16px;}
+        .btn-override { background: rgba(0, 229, 255, 0.2); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 12px 20px; font-family: 'Orbitron'; font-weight: 900; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; flex: 1;}
+        .btn-override:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; width: 100%; max-width: 1600px; }
+        @media (max-width: 1200px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 850px) { .grid-container { grid-template-columns: 1fr; } }
+        
+        .glass-panel { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 15px; backdrop-filter: blur(10px); box-shadow: inset 0 0 15px rgba(0, 150, 255, 0.05); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .panel-title { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--neon-blue); border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        
+        label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; font-weight: bold;}
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 229, 255, 0.2); color: #fff; border-radius: 4px; margin-bottom: 15px; font-size: 16px; font-family: 'Segoe UI'; box-sizing: border-box;}
+        input:focus, select:focus { outline: none; border-color: var(--neon-blue); }
+        .row { display: flex; gap: 10px; flex-wrap: wrap;} .col { flex: 1; min-width: 100px;}
+        
+        .smart-toggle { display: flex; align-items: center; gap: 10px; background: rgba(0,255,102,0.1); padding: 10px; border: 1px solid var(--neon-green); border-radius: 6px; cursor: pointer; margin-bottom: 15px; color: var(--neon-green); font-weight: bold; font-size: 13px;}
+        .smart-toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--neon-green);}
+        
+        .btn { padding: 12px; border: none; border-radius: 4px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; transition: 0.2s; letter-spacing: 1px;}
+        .btn-add { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); width: 100%;}
+        .btn-add:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+        
+        .action-bar { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;}
+        .btn-take { background: rgba(0, 255, 102, 0.1); border: 1px solid var(--neon-green); color: var(--neon-green); flex: 2; font-size: 16px; padding: 15px; min-width: 200px;}
+        .btn-take:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
+        .btn-cut { background: rgba(255, 0, 60, 0.1); border: 1px solid var(--neon-red); color: var(--neon-red); flex: 1; font-size: 16px; padding: 15px; min-width: 120px;}
+        .btn-cut:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
+        
+        .monitor-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; border-radius: 6px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;}
+        .monitor-box iframe { width: 100%; height: 100%; border: none; }
+        .monitor-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 10px; font-family: 'Orbitron', sans-serif; font-size: 11px; border: 1px solid var(--neon-red); border-radius: 3px; z-index: 10; color: var(--neon-red);}
+        
+        .list-box { max-height: 400px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px;}
+        .list-box::-webkit-scrollbar { width: 4px; } .list-box::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+        
+        .play-item { background: rgba(0,0,0,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); position: relative; display: flex; flex-direction: column; gap: 8px;}
+        .play-item.ad { border-left-color: var(--neon-gold); }
+        
+        .item-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;}
+        .i-title { background: transparent; border: none; color: #fff; font-weight: bold; flex: 1; min-width: 100px; font-size: 15px; margin: 0; padding: 0;}
+        .time-badge { background: #000; border: 1px solid rgba(0,229,255,0.3); color: var(--neon-blue); font-size: 11px; padding: 3px 6px; font-family: 'Orbitron', monospace; border-radius: 3px;}
+        
+        .btn-icon { background: none; color: var(--text-muted); border: none; cursor: pointer; padding: 5px 10px; font-size: 16px;}
+        .btn-icon:hover { color: var(--neon-red); }
+        .btn-force { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); border-radius: 3px; padding: 5px 8px; font-size: 11px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer;}
+        
+        .terminal { background: rgba(0,0,0,0.8); border: 1px solid var(--panel-border); border-radius: 8px; padding: 15px; height: 130px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; width: 100%; max-width: 1600px; box-sizing: border-box; margin-top: 15px; box-shadow: inset 0 0 20px #000;}
+        .log { margin: 4px 0; border-bottom: 1px dashed #222; padding-bottom: 4px;}
+        .tc { color: #555; margin-left: 10px; font-size: 11px;}
+        .t-sys { color: var(--neon-blue); } .t-err { color: var(--neon-red); } .t-ok { color: var(--neon-green); } .t-warn { color: var(--neon-gold); }
+        
+        .flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 255, 102, 0.2); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+        .flash-overlay.active { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div id="loginScreen">
+    <div class="login-box">
+        <h1><i class="fa-solid fa-shield-halved"></i> LiveZon <span>SECURE</span></h1>
+        <input type="email" id="loginEmail" placeholder="ئیمەیڵی ئەدمین">
+        <input type="password" id="loginPass" placeholder="تێپەڕوشە (Password)">
+        <button class="btn-login" onclick="login()"><i class="fa-solid fa-right-to-bracket"></i> چوونەژوورەوە</button>
+        <div class="login-error" id="loginError">زانیارییەکان هەڵەن!</div>
+    </div>
+</div>
+
+<div id="appContainer">
+    <div class="flash-overlay" id="flashOverlay"></div>
+
+    <div class="header">
+        <div class="logo-area"><h1><i class="fa-solid fa-microchip"></i> LIVEZON <span>CLOUD MCR</span></h1></div>
+        <div class="status-radar">
+            <i class="fa-solid fa-cloud cloud-sync" id="cloudIcon" title="دۆخی داتابەیس"></i>
+            <button class="btn-icon" style="background: rgba(255,0,0,0.1); border: 1px solid var(--neon-red); border-radius: 4px; color: var(--neon-red); padding: 5px 10px;" onclick="logout()"><i class="fa-solid fa-power-off"></i> دەرچوون</button>
+            <div class="uptime-tracker" id="uptimeDisplay">UPTIME: 00:00:00</div>
+            <div class="air-status" id="airBadge">OFFLINE</div>
+        </div>
+    </div>
+
+    <div class="injector-bar">
+        <i class="fa-solid fa-bolt" style="color: var(--neon-blue); font-size: 20px;"></i>
+        <input type="text" id="quickUrl" placeholder="لینکێکی ڤیدیۆ لێرە دابنێ بۆ دەستێوەردانی خێرا بەبێ ڕیزبەندی...">
+        <button class="btn-override" onclick="quickInject()"><i class="fa-solid fa-forward-fast"></i> OVERRIDE / لێدانی خێرا</button>
+    </div>
+
+    <div class="grid-container">
+        
+        <div class="glass-panel">
+            <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> CLOUD SETTINGS</span></div>
+            <label class="smart-toggle">
+                <input type="checkbox" id="autoRenewToggle" checked onchange="saveDataToCloud()">
+                سیستەمی نوێکردنەوەی خۆکارانە (ڕێگریکردن لە وەستانی ٦ کاتژمێر)
+            </label>
+            <label>شریتی هەواڵ (Ticker Stream)</label>
+            <input type="text" id="tickerText" value="بەخێربێن بۆ سیستەمی لایڤزۆن هەور" onchange="saveDataToCloud()">
+            <label>لۆگۆی کەناڵ (Watermark)</label>
+            <input type="text" id="logoUrl" value="https://i.postimg.cc/Dwwpt9B0/1000034754-removebg-preview.png" onchange="saveDataToCloud()">
+            <label>وێنەی فریاگوزاری (Panic Screen)</label>
+            <input type="text" id="offlineImg" value="https://i.postimg.cc/Dwwpt9B0/1000034754-removebg-preview.png" style="border-color: rgba(255,0,60,0.3);" onchange="saveDataToCloud()">
+            
+            <div class="panel-title" style="margin-top: 20px;"><span><i class="fa-solid fa-bolt"></i> COMMERCIALS</span></div>
+            <label>لێدانی ڕێکلام هەر چەند خولەک جارێک؟</label>
+            <input type="number" id="adInterval" value="10" onchange="saveDataToCloud()">
+            <div id="ad-list" class="list-box" style="max-height: 120px;"></div>
+            <button class="btn btn-add" style="border-color: var(--neon-gold); color: var(--neon-gold);" onclick="createItem('ad')"><i class="fa-solid fa-plus"></i> ADD COMMERCIAL</button>
+        </div>
+        
+        <div class="glass-panel">
+            <div class="panel-title"><span><i class="fa-solid fa-tv"></i> PGM MONITOR</span></div>
+            <div class="monitor-box" id="pgmScreen">
+                <div class="monitor-label">LIVE (PGM)</div>
+                <div style="color: #444; font-weight: 900; font-size: clamp(16px, 4vw, 24px); font-family: 'Orbitron';">NO SIGNAL</div>
+            </div>
+            <div class="row">
+                <input type="text" id="monitorUrl" placeholder="لینکی لایڤەکەی ok.ru..." onchange="updatePGM()" style="margin:0;">
+                <button class="btn btn-add" style="width:auto; padding: 0 20px; margin:0;" onclick="updatePGM()"><i class="fa-solid fa-rotate"></i></button>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-take" id="btnTake" onclick="masterControl('play')"><i class="fa-solid fa-satellite-dish"></i> EXECUTE (PLAY)</button>
+                <button class="btn btn-cut" id="btnCut" onclick="masterControl('stop')"><i class="fa-solid fa-skull-crossbones"></i> PANIC (STOP)</button>
+            </div>
+        </div>
+        
+        <div class="glass-panel">
+            <div class="panel-title">
+                <span><i class="fa-solid fa-list-check"></i> MASTER SEQUENCE</span>
+                <span id="totalDur" style="color: var(--neon-blue);">00:00:00</span>
+            </div>
+            <div id="playlist" class="list-box" style="flex:1;"></div>
+            <button class="btn btn-add" onclick="createItem('play')" style="margin-top: 10px;"><i class="fa-solid fa-film"></i> ADD MEDIA</button>
+        </div>
+    </div>
+
+    <div class="terminal" id="terminal">
+        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE CLOUD CONNECTED. WAITING FOR SECRETS...</div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyA_CyVB1f9UCHG_FMmYDSqG3oLGkohfE80",
+        authDomain: "media-bagera-63d90.firebaseapp.com",
+        projectId: "media-bagera-63d90",
+        storageBucket: "media-bagera-63d90.firebasestorage.app",
+        messagingSenderId: "457510380933",
+        appId: "1:457510380933:web:c181b17a72d5e4a33dd0ec",
+        measurementId: "G-1CVRHFBREB"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // گۆڕراوەکانی گیتھەب کە ئێستا لە داتابەیسەوە پڕ دەکرێنەوە
+    let GITHUB_TOKEN = ""; 
+    const API_USER = "ordarat"; 
+    const API_REPO = "Media-bagera-tv";
+    
+    let isLive = false;
+    let streamStartTime = null;
+    let uptimeInterval = null;
+    let isInitialLoad = true; 
+    const SIX_HOURS_LIMIT_MS = (5 * 60 + 50) * 60 * 1000;
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            log(`چوونەژوورەوەی ئەدمین سەرکەوتوو بوو: ${user.email}`, 'ok');
+            fetchSecrets(); // هێنانەوەی تۆکنەکە بە نهێنی
+            loadDataFromCloud();
+        } else {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+    });
+
+    function login() {
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPass').value;
+        const errObj = document.getElementById('loginError');
+        
+        auth.signInWithEmailAndPassword(email, pass)
+            .catch((error) => {
+                errObj.style.display = 'block';
+                errObj.innerText = 'ئیمەیڵ یان پاسۆرد هەڵەیە!';
+            });
+    }
+
+    function logout() { auth.signOut(); }
+
+    // هێنانەوەی تۆکنی گیتھەب لە داتابەیسی پارێزراو
+    function fetchSecrets() {
+        db.collection("system").doc("secrets").get().then((doc) => {
+            if (doc.exists) {
+                GITHUB_TOKEN = doc.data().githubToken;
+                log('کلیلی نهێنی گیتھەب بە سەرکەوتوویی خوێندراوە.', 'ok');
+                checkAPI(); // تەنها دوای هێنانەوەی تۆکنەکە دەتوانین سێرڤەر بپشکنین
+                setInterval(checkAPI, 15000);
+            } else {
+                log('کلیلی گیتھەب لە داتابەیس نەدۆزرایەوە! تکایە لە فایەربەیس زیادی بکە.', 'err');
+            }
+        }).catch(err => {
+            log('هەڵە لە خوێندنەوەی کلیلی پارێزراو: ' + err.message, 'err');
+        });
+    }
+
+    function setCloudStatus(status) {
+        const icon = document.getElementById('cloudIcon');
+        if(status === 'syncing') icon.className = 'fa-solid fa-cloud cloud-sync syncing';
+        else if (status === 'synced') icon.className = 'fa-solid fa-cloud-check cloud-sync synced';
+    }
+
+    function loadDataFromCloud() {
+        setCloudStatus('syncing');
+        db.collection("system").doc("mcr_data").get().then((doc) => {
+            isInitialLoad = true;
+            if (doc.exists) {
+                const d = doc.data();
+                document.getElementById('tickerText').value = d.t || ''; 
+                document.getElementById('logoUrl').value = d.l || '';
+                document.getElementById('offlineImg').value = d.o || ''; 
+                document.getElementById('monitorUrl').value = d.m || '';
+                document.getElementById('adInterval').value = d.ai || '10'; 
+                document.getElementById('autoRenewToggle').checked = d.ar !== false;
+                
+                document.getElementById('ad-list').innerHTML = '';
+                document.getElementById('playlist').innerHTML = '';
+                
+                if(d.ads) d.ads.forEach(x => createItem('ad', x, true)); 
+                if(d.play) d.play.forEach(x => createItem('play', x, true));
+                
+                updatePGM(); calcTime(true);
+                log('داتاکان لە فایەربەیسەوە خوێندرانەوە.', 'ok');
+            } else {
+                createItem('play', {}, true);
+                log('هیچ داتایەک لە هەوردا نییە، پرۆفایلی نوێ دروستکرا.', 'sys');
+            }
+            setCloudStatus('synced');
+            isInitialLoad = false;
+        });
+    }
+
+    function getListData(containerId) {
+        const arr = [];
+        document.querySelectorAll(`#${containerId} .play-item`).forEach(el => {
+            const url = el.querySelector('.i-url').value;
+            if(url) arr.push({ url: url, title: el.querySelector('.i-title').value, type: el.querySelector('.i-type').value, duration: el.querySelector('.i-dur').value });
+        });
+        return arr;
+    }
+
+    function saveDataToCloud() {
+        if (isInitialLoad) return;
+        setCloudStatus('syncing');
+        const data = {
+            t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
+            o: document.getElementById('offlineImg').value, m: document.getElementById('monitorUrl').value,
+            ai: document.getElementById('adInterval').value, ar: document.getElementById('autoRenewToggle').checked,
+            ads: getListData('ad-list'), play: getListData('playlist')
+        };
+        db.collection("system").doc("mcr_data").set(data).then(() => setCloudStatus('synced'));
+        localStorage.setItem('livezon_cloud_secured', JSON.stringify(data));
+        return data;
+    }
+
+    function log(msg, type='sys') {
+        const term = document.getElementById('terminal');
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        const cClass = type==='ok' ? 't-ok' : type==='err' ? 't-err' : type==='warn' ? 't-warn' : 't-sys';
+        term.insertAdjacentHTML('beforeend', `<div class="log"><span class="${cClass}">[${type.toUpperCase()}]</span> ${msg} <span class="tc">${time}</span></div>`);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function screenFlash(color = 'rgba(0, 255, 102, 0.2)') {
+        const overlay = document.getElementById('flashOverlay');
+        overlay.style.background = color; overlay.classList.add('active');
+        setTimeout(() => overlay.classList.remove('active'), 200);
+    }
+
+    function updatePGM() {
+        const url = document.getElementById('monitorUrl').value.trim();
+        const pgm = document.getElementById('pgmScreen');
+        if(url.includes('ok.ru')) {
+            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
+            pgm.innerHTML = `<div class="monitor-label">LIVE (PGM)</div><iframe src="${fUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+        }
+        if(!isInitialLoad) saveDataToCloud();
+    }
+
+    function createItem(target, data = {}, isFromLoad = false) {
+        const id = Date.now() + Math.floor(Math.random()*100);
+        const isAd = target === 'ad';
+        const html = `
+        <div class="play-item ${isAd ? 'ad' : ''}" id="${id}">
+            <div class="item-top">
+                <i class="fa-solid fa-grip-lines drag-handle" style="color: var(--text-muted); cursor: grab; padding: 5px;"></i>
+                <input type="text" class="i-title" placeholder="ناوی پەڕگە..." value="${data.title || ''}" onchange="saveDataToCloud(); calcTime();">
+                ${!isAd ? `<button class="btn-force" onclick="forcePlayItem(this)"><i class="fa-solid fa-bolt"></i> PLAY</button><div class="time-badge">00:00</div>` : ''}
+                <button class="btn-icon" onclick="this.closest('.play-item').remove(); saveDataToCloud(); calcTime();"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div class="row">
+                <div class="col"><select class="i-type" onchange="calcTime(); saveDataToCloud();" style="margin:0;"><option value="video" ${data.type==='video'?'selected':''}>ڤیدیۆ</option><option value="image" ${data.type==='image'?'selected':''}>وێنە</option></select></div>
+                <div class="col"><input type="number" class="i-dur" placeholder="${isAd ? 'چرکە' : 'خولەک'}" value="${data.dur || data.duration || (isAd?30:60)}" onkeyup="calcTime()" onchange="calcTime(); saveDataToCloud();" style="margin:0;"></div>
+            </div>
+            <input type="text" class="i-url" placeholder="لینکی پەڕگە..." value="${data.url || ''}" onchange="saveDataToCloud()" style="margin-top: 10px; margin-bottom:0;">
+        </div>`;
+        document.getElementById(isAd ? 'ad-list' : 'playlist').insertAdjacentHTML('beforeend', html);
+        if(!isFromLoad) { calcTime(); saveDataToCloud(); }
+    }
+
+    function calcTime(isFromLoad = false) {
+        let mins = 0; const now = new Date();
+        document.querySelectorAll('#playlist .play-item').forEach(el => {
+            const m = parseInt(el.querySelector('.i-dur').value) || 0;
+            const t = new Date(now.getTime() + mins * 60000);
+            el.querySelector('.time-badge').innerText = t.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
+            mins += m;
+        });
+        document.getElementById('totalDur').innerText = `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}:00`;
+        if(!isInitialLoad && !isFromLoad) saveDataToCloud();
+    }
+
+    function forcePlayItem(btn) {
+        const item = btn.closest('.play-item');
+        const container = document.getElementById('playlist');
+        container.insertBefore(item, container.firstChild);
+        screenFlash('rgba(255, 0, 60, 0.2)');
+        log(`[OVERRIDE] بڕیاردرا ڤیدیۆی دیاریکراو ڕاستەوخۆ بخرێتە پەخشەوە!`, 'warn');
+        calcTime(); masterControl('play');
+    }
+
+    function quickInject() {
+        const urlInput = document.getElementById('quickUrl');
+        const url = urlInput.value.trim();
+        if(!url) return alert("تکایە سەرەتا لینکێک دابنێ!");
+        
+        screenFlash('rgba(255, 0, 60, 0.2)');
+        const id = Date.now();
+        const html = `
+        <div class="play-item" id="${id}" style="border-color: #ff003c;">
+            <div class="item-top">
+                <i class="fa-solid fa-grip-lines drag-handle"></i>
+                <input type="text" class="i-title" value="* INJECTION *" onchange="saveDataToCloud();" style="color: #ff003c;">
+                <button class="btn-force" onclick="forcePlayItem(this)"><i class="fa-solid fa-bolt"></i> PLAY</button>
+                <div class="time-badge">00:00</div>
+                <button class="btn-icon" onclick="this.closest('.play-item').remove(); calcTime(); saveDataToCloud();"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div class="row">
+                <div class="col"><select class="i-type" onchange="saveDataToCloud();"><option value="video" selected>ڤیدیۆ</option></select></div>
+                <div class="col"><input type="number" class="i-dur" value="60" onchange="calcTime(); saveDataToCloud();"></div>
+            </div>
+            <input type="text" class="i-url" value="${url}" onchange="saveDataToCloud()" style="margin-top: 10px; margin-bottom:0;">
+        </div>`;
+        document.getElementById('playlist').insertAdjacentHTML('afterbegin', html);
+        urlInput.value = ''; log(`[INJECT] لینکێکی نوێ هەڵدرا ناو سێرڤەر!`, 'warn');
+        calcTime(); masterControl('play');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.drag-handle', onEnd: () => { calcTime(); saveDataToCloud(); } });
+        new Sortable(document.getElementById('ad-list'), { animation: 150, handle: '.drag-handle', onEnd: saveDataToCloud });
+    });
+
+    async function checkAPI() {
+        if(!GITHUB_TOKEN) return; // با هەڵە نەدات ئەگەر تۆکن نەبوو
+        try {
+            const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/runs?status=in_progress`, { headers: { "Authorization": `token ${GITHUB_TOKEN}` }});
+            if(res.ok) {
+                const data = await res.json();
+                const badge = document.getElementById("airBadge");
+                const uptimeDisp = document.getElementById("uptimeDisplay");
+                
+                if(data.total_count > 0) { 
+                    isLive = true;
+                    badge.innerText = 'ON AIR'; badge.className = 'air-status live';
+                    uptimeDisp.style.display = 'block';
+                    const runData = data.workflow_runs[0];
+                    streamStartTime = new Date(runData.created_at).getTime();
+                    startUptimeCounter();
+                } else { 
+                    isLive = false; streamStartTime = null; clearInterval(uptimeInterval);
+                    badge.innerText = 'OFFLINE'; badge.className = 'air-status'; 
+                    uptimeDisp.style.display = 'none';
+                }
+            }
+        } catch(e) {}
+    }
+
+    function startUptimeCounter() {
+        clearInterval(uptimeInterval);
+        uptimeInterval = setInterval(() => {
+            if (!isLive || !streamStartTime) return;
+            const diffMs = Date.now() - streamStartTime;
+            const h = String(Math.floor(diffMs / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, '0');
+            document.getElementById('uptimeDisplay').innerText = `UPTIME: ${h}:${m}:${s}`;
+            
+            if (diffMs >= SIX_HOURS_LIMIT_MS) {
+                const isAutoRenewEnabled = document.getElementById('autoRenewToggle').checked;
+                if (isAutoRenewEnabled) {
+                    log(`[AI RENEWAL] ناردنی فەرمانی نوێکردنەوە بۆ ڕێگریکردن لە پچڕان...`, 'warn');
+                    screenFlash('rgba(255, 215, 0, 0.3)');
+                    streamStartTime = Date.now(); 
+                    masterControl('play');
+                }
+            }
+        }, 1000);
+    }
+
+    async function masterControl(mode) {
+        if(!GITHUB_TOKEN) return log('هەڵە: کلیلی گیتھەب نەدۆزرایەوە، ناتوانرێت فەرمان بنێردرێت!', 'err');
+        
+        const d = {
+            t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
+            o: document.getElementById('offlineImg').value, ai: document.getElementById('adInterval').value,
+            ads: getListData('ad-list'), play: getListData('playlist')
+        };
+        
+        const tk = document.getElementById("btnTake"); const ct = document.getElementById("btnCut");
+        tk.disabled = true; ct.disabled = true;
+        log(`TRANSMITTING: [${mode.toUpperCase()}] ...`, 'sys');
+        if(mode === 'play') screenFlash();
+
+        try {
+            const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/workflows/stream.yml/dispatches`, {
+                method: "POST", headers: { "Accept": "application/vnd.github.v3+json", "Authorization": `token ${GITHUB_TOKEN}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ ref: "main", inputs: { mode: mode, logo_url: d.l, ticker_text: d.t, playlist_data: JSON.stringify(d.play), ads_data: JSON.stringify(d.ads), ad_interval: d.ai, offline_image: d.o } })
+            });
+            if(res.ok) { log(`API ACCEPTED.`, 'ok'); setTimeout(checkAPI, 3000); }
+            else { log(`API REJECTED. بپشکنە بزانە تۆکنەکە ڕاستە.`, 'err'); }
+        } catch(err) { log(`NETWORK FAILURE.`, 'err'); }
+        setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 2000);
+    }
+</script>
+</body>
+</html>
