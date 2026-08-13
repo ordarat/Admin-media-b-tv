@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LiveZon AI Cloud MCR (Secured)</title>
+    <title>LiveZon QUANTUM MCR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
-    <!-- Firebase SDKs (v9 Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -20,15 +19,14 @@
             --neon-blue: #00e5ff; --neon-red: #ff003c; --neon-green: #00ff66; --neon-gold: #ffd700;
             --text-main: #e2f1f8; --text-muted: #5c7c8f;
         }
-        
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-base); background-image: radial-gradient(circle at 50% -20%, #06152d 0%, #02040a 100%); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); background-image: radial-gradient(circle at 50% 50%, #0a192f 0%, #02040a 100%); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .login-box { background: var(--panel-bg); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2); backdrop-filter: blur(10px); text-align: center;}
         .login-box h1 { font-family: 'Orbitron', sans-serif; color: #fff; margin-bottom: 30px; text-shadow: 0 0 10px var(--neon-blue);}
         .login-box h1 span { color: var(--neon-blue); }
         .login-box input { width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px; text-align: left; direction: ltr;}
-        .login-box input:focus { outline: none; border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+        .login-box input:focus { outline: none; border-color: var(--neon-blue); }
         .login-box .btn-login { width: 100%; background: rgba(0, 229, 255, 0.2); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-weight: bold; font-size: 16px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
         .login-box .btn-login:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue);}
         .login-error { color: var(--neon-red); margin-top: 15px; font-size: 14px; font-weight: bold; display: none; }
@@ -110,7 +108,7 @@
 
 <div id="loginScreen">
     <div class="login-box">
-        <h1><i class="fa-solid fa-shield-halved"></i> LiveZon <span>SECURE</span></h1>
+        <h1><i class="fa-solid fa-shield-halved"></i> LiveZon <span>QUANTUM</span></h1>
         <input type="email" id="loginEmail" placeholder="ئیمەیڵی ئەدمین">
         <input type="password" id="loginPass" placeholder="تێپەڕوشە (Password)">
         <button class="btn-login" onclick="login()"><i class="fa-solid fa-right-to-bracket"></i> چوونەژوورەوە</button>
@@ -122,7 +120,7 @@
     <div class="flash-overlay" id="flashOverlay"></div>
 
     <div class="header">
-        <div class="logo-area"><h1><i class="fa-solid fa-microchip"></i> LIVEZON <span>CLOUD MCR</span></h1></div>
+        <div class="logo-area"><h1><i class="fa-solid fa-microchip"></i> LIVEZON <span>QUANTUM MCR</span></h1></div>
         <div class="status-radar">
             <i class="fa-solid fa-cloud cloud-sync" id="cloudIcon" title="دۆخی داتابەیس"></i>
             <button class="btn-icon" style="background: rgba(255,0,0,0.1); border: 1px solid var(--neon-red); border-radius: 4px; color: var(--neon-red); padding: 5px 10px;" onclick="logout()"><i class="fa-solid fa-power-off"></i> دەرچوون</button>
@@ -139,6 +137,7 @@
 
     <div class="grid-container">
         
+        <!-- LEFT: Settings -->
         <div class="glass-panel">
             <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> CLOUD SETTINGS</span></div>
             <label class="smart-toggle">
@@ -159,6 +158,7 @@
             <button class="btn btn-add" style="border-color: var(--neon-gold); color: var(--neon-gold);" onclick="createItem('ad')"><i class="fa-solid fa-plus"></i> ADD COMMERCIAL</button>
         </div>
         
+        <!-- MIDDLE: Monitor -->
         <div class="glass-panel">
             <div class="panel-title"><span><i class="fa-solid fa-tv"></i> PGM MONITOR</span></div>
             <div class="monitor-box" id="pgmScreen">
@@ -175,6 +175,7 @@
             </div>
         </div>
         
+        <!-- RIGHT: Playlist -->
         <div class="glass-panel">
             <div class="panel-title">
                 <span><i class="fa-solid fa-list-check"></i> MASTER SEQUENCE</span>
@@ -186,7 +187,7 @@
     </div>
 
     <div class="terminal" id="terminal">
-        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE CLOUD CONNECTED. WAITING FOR SECRETS...</div>
+        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE CLOUD CONNECTED. SMART ENGINE ACTIVE.</div>
     </div>
 </div>
 
@@ -205,7 +206,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // گۆڕراوەکانی گیتھەب کە ئێستا لە داتابەیسەوە پڕ دەکرێنەوە
     let GITHUB_TOKEN = ""; 
     const API_USER = "ordarat"; 
     const API_REPO = "Media-bagera-tv";
@@ -221,7 +221,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             log(`چوونەژوورەوەی ئەدمین سەرکەوتوو بوو: ${user.email}`, 'ok');
-            fetchSecrets(); // هێنانەوەی تۆکنەکە بە نهێنی
+            fetchSecrets(); 
             loadDataFromCloud();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
@@ -232,30 +232,18 @@
     function login() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPass').value;
-        const errObj = document.getElementById('loginError');
-        
-        auth.signInWithEmailAndPassword(email, pass)
-            .catch((error) => {
-                errObj.style.display = 'block';
-                errObj.innerText = 'ئیمەیڵ یان پاسۆرد هەڵەیە!';
-            });
+        auth.signInWithEmailAndPassword(email, pass).catch(() => { document.getElementById('loginError').style.display = 'block'; });
     }
 
     function logout() { auth.signOut(); }
 
-    // هێنانەوەی تۆکنی گیتھەب لە داتابەیسی پارێزراو
     function fetchSecrets() {
         db.collection("system").doc("secrets").get().then((doc) => {
             if (doc.exists) {
                 GITHUB_TOKEN = doc.data().githubToken;
                 log('کلیلی نهێنی گیتھەب بە سەرکەوتوویی خوێندراوە.', 'ok');
-                checkAPI(); // تەنها دوای هێنانەوەی تۆکنەکە دەتوانین سێرڤەر بپشکنین
-                setInterval(checkAPI, 15000);
-            } else {
-                log('کلیلی گیتھەب لە داتابەیس نەدۆزرایەوە! تکایە لە فایەربەیس زیادی بکە.', 'err');
-            }
-        }).catch(err => {
-            log('هەڵە لە خوێندنەوەی کلیلی پارێزراو: ' + err.message, 'err');
+                checkAPI(); setInterval(checkAPI, 15000);
+            } else { log('کلیلی گیتھەب لە داتابەیس نەدۆزرایەوە!', 'err'); }
         });
     }
 
@@ -271,25 +259,24 @@
             isInitialLoad = true;
             if (doc.exists) {
                 const d = doc.data();
-                document.getElementById('tickerText').value = d.t || ''; 
-                document.getElementById('logoUrl').value = d.l || '';
-                document.getElementById('offlineImg').value = d.o || ''; 
-                document.getElementById('monitorUrl').value = d.m || '';
-                document.getElementById('adInterval').value = d.ai || '10'; 
-                document.getElementById('autoRenewToggle').checked = d.ar !== false;
+                let parsedData = {};
+                try { parsedData = JSON.parse(d.payload || "{}"); } catch(e) {}
                 
-                document.getElementById('ad-list').innerHTML = '';
-                document.getElementById('playlist').innerHTML = '';
+                document.getElementById('tickerText').value = parsedData.t || ''; 
+                document.getElementById('logoUrl').value = parsedData.l || '';
+                document.getElementById('offlineImg').value = parsedData.o || ''; 
+                document.getElementById('monitorUrl').value = parsedData.m || '';
+                document.getElementById('adInterval').value = parsedData.ai || '10'; 
+                document.getElementById('autoRenewToggle').checked = parsedData.ar !== false;
                 
-                if(d.ads) d.ads.forEach(x => createItem('ad', x, true)); 
-                if(d.play) d.play.forEach(x => createItem('play', x, true));
+                document.getElementById('ad-list').innerHTML = ''; document.getElementById('playlist').innerHTML = '';
+                
+                if(parsedData.ads) parsedData.ads.forEach(x => createItem('ad', x, true)); 
+                if(parsedData.play) parsedData.play.forEach(x => createItem('play', x, true));
                 
                 updatePGM(); calcTime(true);
                 log('داتاکان لە فایەربەیسەوە خوێندرانەوە.', 'ok');
-            } else {
-                createItem('play', {}, true);
-                log('هیچ داتایەک لە هەوردا نییە، پرۆفایلی نوێ دروستکرا.', 'sys');
-            }
+            } else { createItem('play', {}, true); }
             setCloudStatus('synced');
             isInitialLoad = false;
         });
@@ -304,17 +291,27 @@
         return arr;
     }
 
-    function saveDataToCloud() {
+    function saveDataToCloud(commandOverride = null) {
         if (isInitialLoad) return;
         setCloudStatus('syncing');
+        
         const data = {
             t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
             o: document.getElementById('offlineImg').value, m: document.getElementById('monitorUrl').value,
             ai: document.getElementById('adInterval').value, ar: document.getElementById('autoRenewToggle').checked,
             ads: getListData('ad-list'), play: getListData('playlist')
         };
-        db.collection("system").doc("mcr_data").set(data).then(() => setCloudStatus('synced'));
-        localStorage.setItem('livezon_cloud_secured', JSON.stringify(data));
+        
+        const payloadStr = JSON.stringify(data);
+        const cmd = commandOverride || window.lastCommand || 'play';
+        window.lastCommand = cmd;
+
+        db.collection("system").doc("mcr_data").set({
+            payload: payloadStr,
+            command: cmd,
+            timestamp: Date.now()
+        }).then(() => setCloudStatus('synced'));
+        
         return data;
     }
 
@@ -380,7 +377,7 @@
         const container = document.getElementById('playlist');
         container.insertBefore(item, container.firstChild);
         screenFlash('rgba(255, 0, 60, 0.2)');
-        log(`[OVERRIDE] بڕیاردرا ڤیدیۆی دیاریکراو ڕاستەوخۆ بخرێتە پەخشەوە!`, 'warn');
+        log(`[OVERRIDE] ڤیدیۆی دیاریکراو برایە سەرەوەی خشتەکە. جێبەجێ دەکرێت...`, 'warn');
         calcTime(); masterControl('play');
     }
 
@@ -417,7 +414,7 @@
     });
 
     async function checkAPI() {
-        if(!GITHUB_TOKEN) return; // با هەڵە نەدات ئەگەر تۆکن نەبوو
+        if(!GITHUB_TOKEN) return;
         try {
             const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/runs?status=in_progress`, { headers: { "Authorization": `token ${GITHUB_TOKEN}` }});
             if(res.ok) {
@@ -452,37 +449,40 @@
             document.getElementById('uptimeDisplay').innerText = `UPTIME: ${h}:${m}:${s}`;
             
             if (diffMs >= SIX_HOURS_LIMIT_MS) {
-                const isAutoRenewEnabled = document.getElementById('autoRenewToggle').checked;
-                if (isAutoRenewEnabled) {
-                    log(`[AI RENEWAL] ناردنی فەرمانی نوێکردنەوە بۆ ڕێگریکردن لە پچڕان...`, 'warn');
+                if (document.getElementById('autoRenewToggle').checked) {
+                    log(`[AI RENEWAL] تێپەڕبوونی ٥ کاتژمێر و ٥٠ خولەک. ناردنی فەرمانی نوێکردنەوە بۆ گیتھەب...`, 'warn');
                     screenFlash('rgba(255, 215, 0, 0.3)');
                     streamStartTime = Date.now(); 
-                    masterControl('play');
+                    masterControl('play', true); // Force GitHub restart
                 }
             }
         }, 1000);
     }
 
-    async function masterControl(mode) {
+    async function masterControl(mode, forceRestart = false) {
         if(!GITHUB_TOKEN) return log('هەڵە: کلیلی گیتھەب نەدۆزرایەوە، ناتوانرێت فەرمان بنێردرێت!', 'err');
         
-        const d = {
-            t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
-            o: document.getElementById('offlineImg').value, ai: document.getElementById('adInterval').value,
-            ads: getListData('ad-list'), play: getListData('playlist')
-        };
+        saveDataToCloud(mode);
         
         const tk = document.getElementById("btnTake"); const ct = document.getElementById("btnCut");
         tk.disabled = true; ct.disabled = true;
-        log(`TRANSMITTING: [${mode.toUpperCase()}] ...`, 'sys');
-        if(mode === 'play') screenFlash();
+        
+        if (mode === 'play') screenFlash();
 
+        // ڕێگریکردن لە ناردنی فەرمان بۆ گیتھەب ئەگەر پێویست نەبێت (خێرایی خەیاڵی)
+        if (isLive && !forceRestart) {
+            log(`[SMART SYNC] سێرڤەرەکە کارایە! داتاکە لە فایەربەیسەوە نێردرا و تا ٣ چرکەی تر ڤیدیۆکە دەگۆڕێت.`, 'ok');
+            setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 2000);
+            return;
+        }
+
+        log(`[WAKE UP] هەڵساندنی سێرڤەری گیتھەب دەستی پێکرد...`, 'sys');
         try {
             const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/workflows/stream.yml/dispatches`, {
                 method: "POST", headers: { "Accept": "application/vnd.github.v3+json", "Authorization": `token ${GITHUB_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ ref: "main", inputs: { mode: mode, logo_url: d.l, ticker_text: d.t, playlist_data: JSON.stringify(d.play), ads_data: JSON.stringify(d.ads), ad_interval: d.ai, offline_image: d.o } })
+                body: JSON.stringify({ ref: "main" })
             });
-            if(res.ok) { log(`API ACCEPTED.`, 'ok'); setTimeout(checkAPI, 3000); }
+            if(res.ok) { log(`گیتھەب فەرمانەکەی وەرگرت. خشتە لە فایەربەیسەوە دەخوێنێتەوە...`, 'ok'); setTimeout(checkAPI, 4000); }
             else { log(`API REJECTED. بپشکنە بزانە تۆکنەکە ڕاستە.`, 'err'); }
         } catch(err) { log(`NETWORK FAILURE.`, 'err'); }
         setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 2000);
