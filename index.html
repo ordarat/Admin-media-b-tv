@@ -62,9 +62,6 @@
         input:focus, select:focus { outline: none; border-color: var(--neon-blue); }
         .row { display: flex; gap: 10px; flex-wrap: wrap;} .col { flex: 1; min-width: 90px;}
         
-        .smart-toggle { display: flex; align-items: center; gap: 10px; background: rgba(0,255,102,0.1); padding: 10px; border: 1px solid var(--neon-green); border-radius: 6px; cursor: pointer; margin-bottom: 15px; color: var(--neon-green); font-weight: bold; font-size: 13px;}
-        .smart-toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--neon-green);}
-        
         .btn { padding: 12px; border: none; border-radius: 4px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; transition: 0.2s; letter-spacing: 1px;}
         .btn-add { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); width: 100%;}
         .btn-add:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
@@ -143,10 +140,6 @@
         <!-- LEFT: Settings -->
         <div class="glass-panel">
             <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> CLOUD SETTINGS</span></div>
-            <label class="smart-toggle">
-                <input type="checkbox" id="autoRenewToggle" checked onchange="saveDataToCloud()">
-                سیستەمی نوێکردنەوەی خۆکارانە (ڕێگریکردن لە وەستانی ٦ کاتژمێر)
-            </label>
             
             <label>شریتی هەواڵ (Ticker Stream)</label>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -216,23 +209,17 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database(); 
-
-    let GITHUB_TOKEN = ""; 
-    const API_USER = "ordarat"; 
-    const API_REPO = "Media-bagera-tv";
     
     let isLive = false;
     let streamStartTime = null;
     let uptimeInterval = null;
     let isInitialLoad = true; 
-    const SIX_HOURS_LIMIT_MS = (5 * 60 + 50) * 60 * 1000;
 
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             log(`چوونەژوورەوەی ئەدمین سەرکەوتوو بوو.`, 'ok');
-            fetchSecrets(); 
             loadDataFromCloud();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
@@ -248,18 +235,6 @@
 
     function logout() { auth.signOut(); }
 
-    function fetchSecrets() {
-        db.ref("system/secrets").once("value").then((snapshot) => {
-            if (snapshot.exists()) {
-                GITHUB_TOKEN = snapshot.val().githubToken;
-                log('کلیلی نهێنی گیتھەب بە سەرکەوتوویی خوێندراوە.', 'ok');
-                checkAPI(); setInterval(checkAPI, 15000);
-            } else { log('کلیلی گیتھەب لە داتابەیس نەدۆزرایەوە!', 'err'); }
-        }).catch(err => {
-            log('هەڵە لە خوێندنەوەی کلیل.', 'err');
-        });
-    }
-
     function setCloudStatus(status) {
         const icon = document.getElementById('cloudIcon');
         if(status === 'syncing') icon.className = 'fa-solid fa-cloud cloud-sync syncing';
@@ -268,34 +243,45 @@
 
     function loadDataFromCloud() {
         setCloudStatus('syncing');
-        db.ref("system/mcr_data").once("value").then((snapshot) => {
-            isInitialLoad = true;
+        
+        // گوێگرتن لە داتابەیسەکە بە بەردەوامی
+        db.ref("system/mcr_data").on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 let parsedData = {};
                 try { parsedData = JSON.parse(d.payload || "{}"); } catch(e) {}
                 
-                document.getElementById('tickerText').value = parsedData.t || ''; 
-                document.getElementById('logoUrl').value = parsedData.l || '';
-                document.getElementById('offlineImg').value = parsedData.o || ''; 
-                document.getElementById('monitorUrl').value = parsedData.m || '';
-                document.getElementById('adInterval').value = parsedData.ai || '10'; 
-                document.getElementById('autoRenewToggle').checked = parsedData.ar !== false;
-                
-                document.getElementById('ad-list').innerHTML = ''; document.getElementById('playlist').innerHTML = '';
-                
-                if(parsedData.ads) parsedData.ads.forEach(x => createItem('ad', x, true)); 
-                if(parsedData.play) parsedData.play.forEach(x => createItem('play', x, true));
-                
-                updatePGM(); calcTime(true);
-                log('داتاکان لە فایەربەیسەوە خوێندرانەوە.', 'ok');
-            } else { createItem('play', {}, true); }
+                // دیاریکردنی دۆخی پەخش بەپێی ئەو فەرمانەی لە داتابەیس دایە
+                if(d.command === 'play' && !isLive) {
+                    setLiveStatus(true);
+                } else if (d.command === 'stop' && isLive) {
+                    setLiveStatus(false);
+                }
+
+                if (isInitialLoad) {
+                    document.getElementById('tickerText').value = parsedData.t || ''; 
+                    document.getElementById('logoUrl').value = parsedData.l || '';
+                    document.getElementById('offlineImg').value = parsedData.o || ''; 
+                    document.getElementById('monitorUrl').value = parsedData.m || '';
+                    document.getElementById('adInterval').value = parsedData.ai || '10'; 
+                    
+                    document.getElementById('ad-list').innerHTML = ''; document.getElementById('playlist').innerHTML = '';
+                    
+                    if(parsedData.ads) parsedData.ads.forEach(x => createItem('ad', x, true)); 
+                    if(parsedData.play) parsedData.play.forEach(x => createItem('play', x, true));
+                    
+                    updatePGM(); calcTime(true);
+                    log('داتاکان لە فایەربەیسەوە خوێندرانەوە و پەیوەندی بە سێرڤەری Node.js کراوە.', 'ok');
+                    isInitialLoad = false;
+                }
+            } else { 
+                if(isInitialLoad) createItem('play', {}, true); 
+                isInitialLoad = false;
+            }
             setCloudStatus('synced');
-            isInitialLoad = false;
         });
     }
 
-    // هەژمارکردنی ماوە لە نێوان دوو کاتدا (دەستپێکردن و کۆتایی)
     function calculateDuration(inputElem) {
         const item = inputElem.closest('.play-item');
         const startVal = item.querySelector('.i-time-start').value;
@@ -310,7 +296,7 @@
             let endMins = eH * 60 + eM;
             
             if(endMins <= startMins) {
-                endMins += 24 * 60; // تێپەڕبوونی نیوەشەو
+                endMins += 24 * 60;
             }
             
             const diff = endMins - startMins;
@@ -334,7 +320,7 @@
                 if(!isAd) {
                     dataObj.timeStart = el.querySelector('.i-time-start').value;
                     dataObj.timeEnd = el.querySelector('.i-time-end').value;
-                    dataObj.time = dataObj.timeStart; // سێرڤەر ئەمە دەخوێنێتەوە بۆ کاتی دەستپێکردن
+                    dataObj.time = dataObj.timeStart;
                 }
                 
                 arr.push(dataObj);
@@ -362,7 +348,7 @@
         const data = {
             t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
             o: document.getElementById('offlineImg').value, m: document.getElementById('monitorUrl').value,
-            ai: document.getElementById('adInterval').value, ar: document.getElementById('autoRenewToggle').checked,
+            ai: document.getElementById('adInterval').value,
             ads: getListData('ad-list'), play: getListData('playlist')
         };
         
@@ -483,7 +469,7 @@
             <input type="text" class="i-url" value="${url}" dir="ltr" style="margin-top: 10px; margin-bottom:0;">
         </div>`;
         document.getElementById('playlist').insertAdjacentHTML('afterbegin', html);
-        urlInput.value = ''; log(`[INJECT] لینکێکی نوێ هەڵدرا ناو سێرڤەر!`, 'warn');
+        urlInput.value = ''; log(`[INJECT] لینکێکی نوێ هەڵدرا ناو ڕیزبەندی!`, 'warn');
         calcTime(); masterControl('play');
     }
 
@@ -492,29 +478,24 @@
         new Sortable(document.getElementById('ad-list'), { animation: 150, handle: '.drag-handle' });
     });
 
-    async function checkAPI() {
-        if(!GITHUB_TOKEN) return;
-        try {
-            const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/runs?status=in_progress`, { headers: { "Authorization": `token ${GITHUB_TOKEN}` }});
-            if(res.ok) {
-                const data = await res.json();
-                const badge = document.getElementById("airBadge");
-                const uptimeDisp = document.getElementById("uptimeDisplay");
-                
-                if(data.total_count > 0) { 
-                    isLive = true;
-                    badge.innerText = 'ON AIR'; badge.className = 'air-status live';
-                    uptimeDisp.style.display = 'block';
-                    const runData = data.workflow_runs[0];
-                    streamStartTime = new Date(runData.created_at).getTime();
-                    startUptimeCounter();
-                } else { 
-                    isLive = false; streamStartTime = null; clearInterval(uptimeInterval);
-                    badge.innerText = 'OFFLINE'; badge.className = 'air-status'; 
-                    uptimeDisp.style.display = 'none';
-                }
-            }
-        } catch(e) {}
+    function setLiveStatus(status) {
+        isLive = status;
+        const badge = document.getElementById("airBadge");
+        const uptimeDisp = document.getElementById("uptimeDisplay");
+        
+        if (status) {
+            badge.innerText = 'ON AIR'; badge.className = 'air-status live';
+            uptimeDisp.style.display = 'block';
+            streamStartTime = Date.now();
+            startUptimeCounter();
+            log(`[SIGNAL] پەخشەکە دەستی پێکرد. سێرڤەر وەڵامی دایەوە.`, 'ok');
+        } else {
+            badge.innerText = 'OFFLINE'; badge.className = 'air-status'; 
+            uptimeDisp.style.display = 'none';
+            streamStartTime = null;
+            clearInterval(uptimeInterval);
+            log(`[SIGNAL] پەخشەکە وەستا.`, 'err');
+        }
     }
 
     function startUptimeCounter() {
@@ -526,44 +507,23 @@
             const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, '0');
             const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, '0');
             document.getElementById('uptimeDisplay').innerText = `UPTIME: ${h}:${m}:${s}`;
-            
-            if (diffMs >= SIX_HOURS_LIMIT_MS) {
-                if (document.getElementById('autoRenewToggle').checked) {
-                    log(`[AI RENEWAL] تێپەڕبوونی ٥ کاتژمێر و ٥٠ خولەک. ناردنی فەرمانی نوێکردنەوە...`, 'warn');
-                    screenFlash('rgba(255, 215, 0, 0.3)');
-                    streamStartTime = Date.now(); 
-                    masterControl('play', true); 
-                }
-            }
         }, 1000);
     }
 
-    async function masterControl(mode, forceRestart = false) {
-        if(!GITHUB_TOKEN) return log('هەڵە: کلیلی گیتھەب نەدۆزرایەوە، ناتوانرێت فەرمان بنێردرێت!', 'err');
-        
-        saveDataToCloud(mode);
-        
+    function masterControl(mode) {
         const tk = document.getElementById("btnTake"); const ct = document.getElementById("btnCut");
         tk.disabled = true; ct.disabled = true;
         
-        if (mode === 'play') screenFlash();
-
-        if (isLive && !forceRestart) {
-            log(`[SMART SYNC] سێرڤەرەکە کارایە! داتاکە لە فایەربەیسەوە نێردرا و تا ٢ چرکەی تر ڤیدیۆکە دەگۆڕێت.`, 'ok');
-            setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 2000);
-            return;
+        saveDataToCloud(mode);
+        
+        if (mode === 'play') {
+            screenFlash();
+            log(`[MCR] فەرمانی پەخشکردن نێردرا بۆ سێرڤەری Node.js...`, 'sys');
+        } else if (mode === 'stop') {
+            log(`[MCR] فەرمانی وەستاندنی پەخش نێردرا (PANIC).`, 'warn');
         }
-
-        log(`[WAKE UP] هەڵساندنی سێرڤەری گیتھەب دەستی پێکرد...`, 'sys');
-        try {
-            const res = await fetch(`https://api.github.com/repos/${API_USER}/${API_REPO}/actions/workflows/stream.yml/dispatches`, {
-                method: "POST", headers: { "Accept": "application/vnd.github.v3+json", "Authorization": `token ${GITHUB_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ ref: "main" })
-            });
-            if(res.ok) { log(`گیتھەب فەرمانەکەی وەرگرت.`, 'ok'); setTimeout(checkAPI, 4000); }
-            else { log(`API REJECTED.`, 'err'); }
-        } catch(err) { log(`NETWORK FAILURE.`, 'err'); }
-        setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 2000);
+        
+        setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 1000);
     }
 </script>
 </body>
