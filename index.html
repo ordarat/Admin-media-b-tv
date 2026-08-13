@@ -195,9 +195,11 @@
 </div>
 
 <script>
+    // --- لێرەدا لینکی داتابەیسەکەمان زیاد کردووە بۆ ئەوەی کێشەکە دروست نەکاتەوە ---
     const firebaseConfig = {
         apiKey: "AIzaSyA_CyVB1f9UCHG_FMmYDSqG3oLGkohfE80",
         authDomain: "media-bagera-63d90.firebaseapp.com",
+        databaseURL: "https://media-bagera-63d90-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "media-bagera-63d90",
         storageBucket: "media-bagera-63d90.firebasestorage.app",
         messagingSenderId: "457510380933",
@@ -247,6 +249,8 @@
                 log('کلیلی نهێنی گیتھەب بە سەرکەوتوویی خوێندراوە.', 'ok');
                 checkAPI(); setInterval(checkAPI, 15000);
             } else { log('کلیلی گیتھەب لە داتابەیس نەدۆزرایەوە!', 'err'); }
+        }).catch(err => {
+            log('هەڵە لە خوێندنەوەی کلیلی گیتھەب. بپشکنە بزانە داتابەیسەکە ڕاستە.', 'err');
         });
     }
 
