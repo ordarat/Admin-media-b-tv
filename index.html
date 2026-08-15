@@ -47,8 +47,8 @@
         
         .injector-bar { width: 100%; max-width: 1600px; background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 10px 15px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-sizing: border-box; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); }
         .injector-bar input { flex: 1; min-width: 250px; background: #000; border: 1px solid rgba(0, 229, 255, 0.3); color: var(--neon-blue); padding: 12px; border-radius: 4px; font-family: monospace; font-size: 16px;}
-        .btn-override { background: rgba(0, 229, 255, 0.2); color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 12px 20px; font-family: 'Orbitron'; font-weight: 900; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; flex: 1;}
-        .btn-override:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        .btn-override { background: rgba(255, 0, 60, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red); padding: 12px 20px; font-family: 'Orbitron'; font-weight: 900; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; flex: 1;}
+        .btn-override:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
         
         .grid-container { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; width: 100%; max-width: 1600px; }
         @media (max-width: 1200px) { .grid-container { grid-template-columns: 1fr 1fr; } }
@@ -82,7 +82,6 @@
         .list-box::-webkit-scrollbar { width: 4px; } .list-box::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
         
         .play-item { background: rgba(0,0,0,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); position: relative; display: flex; flex-direction: column; gap: 8px;}
-        .play-item.ad { border-left-color: var(--neon-gold); }
         
         .item-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;}
         .i-title { background: transparent; border: none; color: #fff; font-weight: bold; flex: 1; min-width: 100px; font-size: 15px; margin: 0; padding: 0;}
@@ -93,7 +92,6 @@
         
         .btn-icon { background: none; color: var(--text-muted); border: none; cursor: pointer; padding: 5px 10px; font-size: 16px;}
         .btn-icon:hover { color: var(--neon-red); }
-        .btn-force { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); border-radius: 3px; padding: 5px 8px; font-size: 11px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer;}
         
         .terminal { background: rgba(0,0,0,0.8); border: 1px solid var(--panel-border); border-radius: 8px; padding: 15px; height: 130px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; width: 100%; max-width: 1600px; box-sizing: border-box; margin-top: 15px; box-shadow: inset 0 0 20px #000;}
         .log { margin: 4px 0; border-bottom: 1px dashed #222; padding-bottom: 4px;}
@@ -132,7 +130,7 @@
     <div class="injector-bar">
         <i class="fa-solid fa-bolt" style="color: var(--neon-blue); font-size: 20px;"></i>
         <input type="text" id="quickUrl" placeholder="لینکێکی ڤیدیۆ لێرە دابنێ بۆ دەستێوەردانی خێرا بەبێ ڕیزبەندی..." dir="ltr">
-        <button class="btn-override" onclick="quickInject()"><i class="fa-solid fa-forward-fast"></i> OVERRIDE / لێدانی خێرا</button>
+        <button class="btn-override" onclick="quickInject()"><i class="fa-solid fa-forward-fast"></i> OVERRIDE / هەواڵی بەپەلە</button>
     </div>
 
     <div class="grid-container">
@@ -141,23 +139,13 @@
         <div class="glass-panel">
             <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> CLOUD SETTINGS</span></div>
             
-            <label>شریتی هەواڵ (Ticker Stream)</label>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا" style="margin:0;">
-                <button class="btn btn-save" style="width:auto; padding: 0 20px; margin:0; border-color:var(--neon-blue); color:var(--neon-blue); background:rgba(0, 229, 255, 0.1);" onclick="updateTickerLive()" title="نوێکردنەوەی شریت بەبێ وەستانی ڤیدیۆ"><i class="fa-solid fa-bolt"></i> خێرا گۆڕین</button>
-            </div>
+            <label>شریتی هەواڵ (جێگیر)</label>
+            <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا">
             
             <label>لۆگۆی کەناڵ (Watermark)</label>
             <input type="text" id="logoUrl" value="https://i.postimg.cc/Dwwpt9B0/1000034754-removebg-preview.png" dir="ltr">
-            <label>وێنەی فریاگوزاری (Panic Screen)</label>
-            <input type="text" id="offlineImg" value="https://i.postimg.cc/Dwwpt9B0/1000034754-removebg-preview.png" style="border-color: rgba(255,0,60,0.3);" dir="ltr">
             
-            <div class="panel-title" style="margin-top: 20px;"><span><i class="fa-solid fa-bolt"></i> COMMERCIALS</span></div>
-            <label>لێدانی ڕێکلام هەر چەند خولەک جارێک؟</label>
-            <input type="number" id="adInterval" value="10" dir="ltr">
-            <div id="ad-list" class="list-box" style="max-height: 150px;"></div>
-            <button class="btn btn-add" style="border-color: var(--neon-gold); color: var(--neon-gold);" onclick="createItem('ad')"><i class="fa-solid fa-plus"></i> ADD COMMERCIAL</button>
-            <button class="btn btn-save" onclick="manualSaveData()"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان</button>
+            <button class="btn btn-save" onclick="saveSettingsOnly()"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان</button>
         </div>
         
         <!-- MIDDLE: Monitor -->
@@ -171,26 +159,46 @@
                 <input type="text" id="monitorUrl" placeholder="لینکی لایڤەکەی ok.ru..." onchange="updatePGM()" style="margin:0;" dir="ltr">
                 <button class="btn btn-add" style="width:auto; padding: 0 20px; margin:0;" onclick="updatePGM()"><i class="fa-solid fa-rotate"></i></button>
             </div>
+            
+            <!-- قۆپچەی کۆنتڕۆڵ و پۆز/ڕیزوم -->
             <div class="action-bar">
-                <button class="btn btn-take" id="btnTake" onclick="masterControl('play')"><i class="fa-solid fa-satellite-dish"></i> EXECUTE (PLAY)</button>
+                <button class="btn btn-take" id="btnTake" onclick="masterControl('play_playlist')"><i class="fa-solid fa-satellite-dish"></i> EXECUTE (PLAY SCHEDULE)</button>
                 <button class="btn btn-cut" id="btnCut" onclick="masterControl('stop')"><i class="fa-solid fa-skull-crossbones"></i> PANIC (STOP)</button>
+            </div>
+            <div class="action-bar" style="margin-top: 10px;">
+                <button class="btn btn-add" style="border-color: var(--neon-gold); color: var(--neon-gold); flex: 1;" onclick="masterControl('pause')"><i class="fa-solid fa-pause"></i> PAUSE (ڕاگرتن)</button>
+                <button class="btn btn-add" style="border-color: var(--neon-blue); color: var(--neon-blue); flex: 1;" onclick="masterControl('resume')"><i class="fa-solid fa-play"></i> RESUME (دەستپێکردنەوە)</button>
             </div>
         </div>
         
-        <!-- RIGHT: Playlist -->
+        <!-- RIGHT: Playlist 7-Day -->
         <div class="glass-panel">
             <div class="panel-title">
-                <span><i class="fa-solid fa-list-check"></i> MASTER SEQUENCE</span>
+                <span><i class="fa-solid fa-list-check"></i> خشتەی ڕۆژانە</span>
                 <span id="totalDur" style="color: var(--neon-blue);">00:00:00</span>
             </div>
+            
+            <!-- هەڵبژاردنی ڕۆژ -->
+            <label style="color: var(--neon-gold);">پەخشی ڕۆژی:</label>
+            <select id="daySelector" onchange="switchDay(this.value)" style="background: rgba(255, 215, 0, 0.1); border-color: var(--neon-gold); color: var(--neon-gold); font-weight: bold; font-family: 'Orbitron', 'Segoe UI'; text-align: center;">
+                <option value="Saturday">شەممە (Saturday)</option>
+                <option value="Sunday">یەکشەممە (Sunday)</option>
+                <option value="Monday">دووشەممە (Monday)</option>
+                <option value="Tuesday">سێشەممە (Tuesday)</option>
+                <option value="Wednesday">چوارشەممە (Wednesday)</option>
+                <option value="Thursday">پێنجشەممە (Thursday)</option>
+                <option value="Friday">هەینی (Friday)</option>
+            </select>
+            
             <div id="playlist" class="list-box" style="flex:1;"></div>
-            <button class="btn btn-add" onclick="createItem('play')" style="margin-top: 10px;"><i class="fa-solid fa-film"></i> ADD MEDIA</button>
-            <button class="btn btn-save" onclick="manualSaveData()"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی خشتەکان</button>
+            
+            <button class="btn btn-add" onclick="createItem()" style="margin-top: 10px;"><i class="fa-solid fa-film"></i> ADD MEDIA (زیادکردنی ڤیدیۆ)</button>
+            <button class="btn btn-save" onclick="saveDataToCloud('play_playlist')"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی خشتە و پەخشکردن</button>
         </div>
     </div>
 
     <div class="terminal" id="terminal">
-        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE REALTIME DB CONNECTED. ULTRA FAST SYNC ACTIVE.</div>
+        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE REALTIME DB CONNECTED. QUANTUM SYNC ACTIVE.</div>
     </div>
 </div>
 
@@ -214,12 +222,27 @@
     let streamStartTime = null;
     let uptimeInterval = null;
     let isInitialLoad = true; 
+    
+    // کۆگای زانیارییەکانی ٧ ڕۆژی هەفتە
+    let weeklySchedule = {
+        "Saturday": [], "Sunday": [], "Monday": [], "Tuesday": [],
+        "Wednesday": [], "Thursday": [], "Friday": []
+    };
+    let currentEditingDay = "Saturday";
 
+    // دیاریکردنی ڕۆژی ئەمڕۆ
+    const daysArr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
             log(`چوونەژوورەوەی ئەدمین سەرکەوتوو بوو.`, 'ok');
+            
+            // دانانی ڕۆژی ئەمڕۆ وەک دیفۆڵت لە داشبۆردەکە
+            currentEditingDay = daysArr[new Date().getDay()];
+            document.getElementById('daySelector').value = currentEditingDay;
+            
             loadDataFromCloud();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
@@ -244,15 +267,13 @@
     function loadDataFromCloud() {
         setCloudStatus('syncing');
         
-        // گوێگرتن لە داتابەیسەکە بە بەردەوامی
         db.ref("system/mcr_data").on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 let parsedData = {};
                 try { parsedData = JSON.parse(d.payload || "{}"); } catch(e) {}
                 
-                // دیاریکردنی دۆخی پەخش بەپێی ئەو فەرمانەی لە داتابەیس دایە
-                if(d.command === 'play' && !isLive) {
+                if(d.command === 'play_playlist' && !isLive) {
                     setLiveStatus(true);
                 } else if (d.command === 'stop' && isLive) {
                     setLiveStatus(false);
@@ -261,25 +282,37 @@
                 if (isInitialLoad) {
                     document.getElementById('tickerText').value = parsedData.t || ''; 
                     document.getElementById('logoUrl').value = parsedData.l || '';
-                    document.getElementById('offlineImg').value = parsedData.o || ''; 
                     document.getElementById('monitorUrl').value = parsedData.m || '';
-                    document.getElementById('adInterval').value = parsedData.ai || '10'; 
                     
-                    document.getElementById('ad-list').innerHTML = ''; document.getElementById('playlist').innerHTML = '';
+                    if (parsedData.schedule) {
+                        weeklySchedule = Object.assign(weeklySchedule, parsedData.schedule);
+                    }
                     
-                    if(parsedData.ads) parsedData.ads.forEach(x => createItem('ad', x, true)); 
-                    if(parsedData.play) parsedData.play.forEach(x => createItem('play', x, true));
-                    
-                    updatePGM(); calcTime(true);
-                    log('داتاکان لە فایەربەیسەوە خوێندرانەوە و پەیوەندی بە سێرڤەری Node.js کراوە.', 'ok');
+                    renderPlaylistForDay(currentEditingDay);
+                    updatePGM();
+                    log('داتاکان لە فایەربەیسەوە خوێندرانەوە.', 'ok');
                     isInitialLoad = false;
                 }
-            } else { 
-                if(isInitialLoad) createItem('play', {}, true); 
-                isInitialLoad = false;
             }
             setCloudStatus('synced');
         });
+    }
+
+    // گۆڕینی ڕۆژ لە داشبۆردەکە
+    function switchDay(selectedDay) {
+        // سەرەتا لیستەکەی ئێستا خەزن دەکەین بۆ ناو مێمۆری
+        weeklySchedule[currentEditingDay] = getListData();
+        // پاشان ڕۆژە تازەکە دەهێنینە پێشەوە
+        currentEditingDay = selectedDay;
+        renderPlaylistForDay(currentEditingDay);
+        log(`خشتەی ڕۆژی [${selectedDay}] کرایەوە.`, 'sys');
+    }
+
+    function renderPlaylistForDay(day) {
+        document.getElementById('playlist').innerHTML = '';
+        const items = weeklySchedule[day] || [];
+        items.forEach(x => createItem(x));
+        calcTime();
     }
 
     function calculateDuration(inputElem) {
@@ -287,6 +320,7 @@
         const startVal = item.querySelector('.i-time-start').value;
         const endVal = item.querySelector('.i-time-end').value;
         const durInput = item.querySelector('.i-dur');
+        const durDisplay = item.querySelector('.dur-display');
         
         if(startVal && endVal) {
             const [sH, sM] = startVal.split(':').map(Number);
@@ -295,74 +329,63 @@
             let startMins = sH * 60 + sM;
             let endMins = eH * 60 + eM;
             
-            if(endMins <= startMins) {
-                endMins += 24 * 60;
-            }
+            if(endMins <= startMins) endMins += 24 * 60;
             
-            const diff = endMins - startMins;
-            durInput.value = diff;
+            const diffMins = endMins - startMins;
+            const diffSeconds = diffMins * 60;
+            
+            durInput.value = diffSeconds; 
+            durDisplay.innerText = diffSeconds + " چرکە";
         }
     }
 
-    function getListData(containerId) {
+    function getListData() {
         const arr = [];
-        document.querySelectorAll(`#${containerId} .play-item`).forEach(el => {
+        document.querySelectorAll(`#playlist .play-item`).forEach(el => {
             const url = el.querySelector('.i-url').value;
-            const isAd = containerId === 'ad-list';
             if(url) {
-                const dataObj = { 
+                arr.push({ 
                     url: url, 
                     title: el.querySelector('.i-title').value, 
-                    type: el.querySelector('.i-type').value, 
-                    duration: el.querySelector('.i-dur').value
-                };
-                
-                if(!isAd) {
-                    dataObj.timeStart = el.querySelector('.i-time-start').value;
-                    dataObj.timeEnd = el.querySelector('.i-time-end').value;
-                    dataObj.time = dataObj.timeStart;
-                }
-                
-                arr.push(dataObj);
+                    timeStart: el.querySelector('.i-time-start').value,
+                    timeEnd: el.querySelector('.i-time-end').value,
+                    duration: el.querySelector('.i-dur').value // بە چرکە
+                });
             }
         });
         return arr;
-    }
-
-    function manualSaveData() {
-        saveDataToCloud();
-        log('داتاکان بە سەرکەوتوویی پاشەکەوت کران.', 'ok');
-        alert("بە سەرکەوتوویی پاشەکەوت کرا!");
-    }
-
-    function updateTickerLive() {
-        saveDataToCloud('ticker_only');
-        screenFlash('rgba(0, 229, 255, 0.2)');
-        log('[LIVE] شریتی هەواڵ نوێکرایەوە بەبێ پچڕانی پەخش!', 'ok');
     }
 
     function saveDataToCloud(commandOverride = null) {
         if (isInitialLoad) return;
         setCloudStatus('syncing');
         
+        // خەزنکردنی ئەوەی ئێستا لەسەر شاشەی داشبۆردە بۆ ناو مێمۆری ٧ ڕۆژەکە
+        weeklySchedule[currentEditingDay] = getListData();
+        
         const data = {
-            t: document.getElementById('tickerText').value, l: document.getElementById('logoUrl').value,
-            o: document.getElementById('offlineImg').value, m: document.getElementById('monitorUrl').value,
-            ai: document.getElementById('adInterval').value,
-            ads: getListData('ad-list'), play: getListData('playlist')
+            t: document.getElementById('tickerText').value, 
+            l: document.getElementById('logoUrl').value,
+            m: document.getElementById('monitorUrl').value,
+            schedule: weeklySchedule 
         };
         
         const payloadStr = JSON.stringify(data);
-        const cmd = commandOverride || window.lastCommand || 'play';
-        if (cmd !== 'ticker_only') window.lastCommand = cmd;
+        const cmd = commandOverride || 'play_playlist';
 
         db.ref("system/mcr_data").set({
             payload: payloadStr,
             command: cmd,
             timestamp: Date.now()
-        }).then(() => setCloudStatus('synced'));
-        
-        return data;
+        }).then(() => {
+            setCloudStatus('synced');
+            log(`هەموو خشتەکان پاشەکەوت کران و فەرمانی [${cmd}] نێردرا.`, 'ok');
+        });
+    }
+
+    function saveSettingsOnly() {
+        saveDataToCloud('update_settings');
+        alert('ڕێکخستنەکان خەزن کران.');
     }
 
     function log(msg, type='sys') {
@@ -386,96 +409,77 @@
             let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
             pgm.innerHTML = `<div class="monitor-label">LIVE (PGM)</div><iframe src="${fUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
         }
-        if(!isInitialLoad) saveDataToCloud();
     }
 
-    function createItem(target, data = {}, isFromLoad = false) {
+    function createItem(data = {}) {
         const id = Date.now() + Math.floor(Math.random()*100);
-        const isAd = target === 'ad';
+        const durSec = data.duration || 3600; // ٦٠ خولەک وەکو دیفۆڵت
+        
         const html = `
-        <div class="play-item ${isAd ? 'ad' : ''}" id="${id}">
+        <div class="play-item" id="${id}">
             <div class="item-top">
                 <i class="fa-solid fa-grip-lines drag-handle" style="color: var(--text-muted); cursor: grab; padding: 5px;"></i>
-                <input type="text" class="i-title" placeholder="ناوی پەڕگە..." value="${data.title || ''}" onchange="calcTime();">
-                ${!isAd ? `<button class="btn-force" onclick="forcePlayItem(this)"><i class="fa-solid fa-bolt"></i> PLAY</button><div class="time-badge">00:00</div>` : ''}
+                <input type="text" class="i-title" placeholder="ناوی کەناڵ یان ڤیدیۆ..." value="${data.title || ''}">
+                <div class="time-badge dur-display">${durSec} چرکە</div>
                 <button class="btn-icon" onclick="this.closest('.play-item').remove(); calcTime();"><i class="fa-solid fa-trash"></i></button>
             </div>
             <div class="row">
-                <div class="col"><select class="i-type" onchange="calcTime();" style="margin:0;"><option value="video" ${data.type==='video'?'selected':''}>ڤیدیۆ</option><option value="image" ${data.type==='image'?'selected':''}>وێنە</option></select></div>
-                ${isAd ? 
-                `<div class="col"><input type="number" class="i-dur" placeholder="چرکە" value="${data.dur || data.duration || 30}" onchange="calcTime();" style="margin:0;" dir="ltr" title="ماوە بە چرکە"></div>` 
-                : 
-                `
                 <div class="col">
                     <span class="time-label">دەستپێک:</span>
-                    <input type="time" class="i-time-start" value="${data.timeStart || data.time || ''}" onchange="calculateDuration(this); calcTime();" style="margin:0;" dir="ltr">
+                    <input type="time" class="i-time-start" value="${data.timeStart || ''}" onchange="calculateDuration(this); calcTime();" style="margin:0;" dir="ltr">
                 </div>
                 <div class="col">
                     <span class="time-label end">کۆتایی:</span>
                     <input type="time" class="i-time-end" value="${data.timeEnd || ''}" onchange="calculateDuration(this); calcTime();" style="margin:0;" dir="ltr">
                 </div>
-                <input type="hidden" class="i-dur" value="${data.duration || 60}">
-                `
-                }
+                <!-- ماوەی ڤیدیۆ بە چرکە (بۆ سێرڤەر گرنگە) -->
+                <input type="hidden" class="i-dur" value="${durSec}">
             </div>
-            <input type="text" class="i-url" placeholder="لینکی پەڕگە..." value="${data.url || ''}" dir="ltr" style="margin-top: 10px; margin-bottom:0;">
+            <input type="text" class="i-url" placeholder="لینکی m3u8 یان mp4..." value="${data.url || ''}" dir="ltr" style="margin-top: 10px; margin-bottom:0;">
         </div>`;
-        document.getElementById(isAd ? 'ad-list' : 'playlist').insertAdjacentHTML('beforeend', html);
-        if(!isFromLoad) { calcTime(); }
+        document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
+        calcTime();
     }
 
-    function calcTime(isFromLoad = false) {
-        let mins = 0; const now = new Date();
+    function calcTime() {
+        let seconds = 0;
         document.querySelectorAll('#playlist .play-item').forEach(el => {
-            const m = parseInt(el.querySelector('.i-dur').value) || 0;
-            const t = new Date(now.getTime() + mins * 60000);
-            el.querySelector('.time-badge').innerText = t.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
-            mins += m;
+            const s = parseInt(el.querySelector('.i-dur').value) || 0;
+            seconds += s;
         });
-        document.getElementById('totalDur').innerText = `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}:00`;
+        
+        const h = String(Math.floor(seconds / 3600)).padStart(2,'0');
+        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2,'0');
+        const s = String(seconds % 60).padStart(2,'0');
+        
+        document.getElementById('totalDur').innerText = `${h}:${m}:${s}`;
     }
 
-    function forcePlayItem(btn) {
-        const item = btn.closest('.play-item');
-        const container = document.getElementById('playlist');
-        container.insertBefore(item, container.firstChild);
-        screenFlash('rgba(255, 0, 60, 0.2)');
-        log(`[OVERRIDE] بڕیاردرا ڤیدیۆی دیاریکراو ڕاستەوخۆ بخرێتە پەخشەوە!`, 'warn');
-        calcTime(); masterControl('play');
-    }
-
+    // فەرمانی لێدانی هەواڵی بەپەلە (Override)
     function quickInject() {
         const urlInput = document.getElementById('quickUrl');
         const url = urlInput.value.trim();
         if(!url) return alert("تکایە سەرەتا لینکێک دابنێ!");
         
+        const payloadStr = JSON.stringify({
+            play: [{ url: url, title: "بەپەلە (Override)", duration: 3600 }], // ١ کاتژمێر کاتی پێ دەدەین
+            n: "Media Bagera TV",
+            l: document.getElementById('logoUrl').value
+        });
+        
+        db.ref("system/mcr_data").set({
+            payload: payloadStr,
+            command: 'override',
+            timestamp: Date.now()
+        });
+        
         screenFlash('rgba(255, 0, 60, 0.2)');
-        const id = Date.now();
-        const html = `
-        <div class="play-item" id="${id}" style="border-color: #ff003c;">
-            <div class="item-top">
-                <i class="fa-solid fa-grip-lines drag-handle"></i>
-                <input type="text" class="i-title" value="* INJECTION *" style="color: #ff003c;">
-                <button class="btn-force" onclick="forcePlayItem(this)"><i class="fa-solid fa-bolt"></i> PLAY</button>
-                <div class="time-badge">00:00</div>
-                <button class="btn-icon" onclick="this.closest('.play-item').remove(); calcTime();"><i class="fa-solid fa-trash"></i></button>
-            </div>
-            <div class="row">
-                <div class="col"><select class="i-type"><option value="video" selected>ڤیدیۆ</option></select></div>
-                <div class="col"><span class="time-label">دەستپێک:</span><input type="time" class="i-time-start" value="" onchange="calculateDuration(this); calcTime();" dir="ltr"></div>
-                <div class="col"><span class="time-label end">کۆتایی:</span><input type="time" class="i-time-end" value="" onchange="calculateDuration(this); calcTime();" dir="ltr"></div>
-                <input type="hidden" class="i-dur" value="60">
-            </div>
-            <input type="text" class="i-url" value="${url}" dir="ltr" style="margin-top: 10px; margin-bottom:0;">
-        </div>`;
-        document.getElementById('playlist').insertAdjacentHTML('afterbegin', html);
-        urlInput.value = ''; log(`[INJECT] لینکێکی نوێ هەڵدرا ناو ڕیزبەندی!`, 'warn');
-        calcTime(); masterControl('play');
+        log(`[OVERRIDE] لینکێکی بەپەلە نێردرا. خشتەکە ڕاگیرا و پەخشی نوێ دەستی پێکرد!`, 'warn');
+        urlInput.value = '';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.drag-handle', onEnd: () => { calcTime(); } });
-        new Sortable(document.getElementById('ad-list'), { animation: 150, handle: '.drag-handle' });
     });
 
     function setLiveStatus(status) {
@@ -486,15 +490,13 @@
         if (status) {
             badge.innerText = 'ON AIR'; badge.className = 'air-status live';
             uptimeDisp.style.display = 'block';
-            streamStartTime = Date.now();
+            if(!streamStartTime) streamStartTime = Date.now();
             startUptimeCounter();
-            log(`[SIGNAL] پەخشەکە دەستی پێکرد. سێرڤەر وەڵامی دایەوە.`, 'ok');
         } else {
             badge.innerText = 'OFFLINE'; badge.className = 'air-status'; 
             uptimeDisp.style.display = 'none';
             streamStartTime = null;
             clearInterval(uptimeInterval);
-            log(`[SIGNAL] پەخشەکە وەستا.`, 'err');
         }
     }
 
@@ -510,20 +512,15 @@
         }, 1000);
     }
 
-    function masterControl(mode) {
-        const tk = document.getElementById("btnTake"); const ct = document.getElementById("btnCut");
-        tk.disabled = true; ct.disabled = true;
-        
-        saveDataToCloud(mode);
-        
-        if (mode === 'play') {
-            screenFlash();
-            log(`[MCR] فەرمانی پەخشکردن نێردرا بۆ سێرڤەری Node.js...`, 'sys');
-        } else if (mode === 'stop') {
-            log(`[MCR] فەرمانی وەستاندنی پەخش نێردرا (PANIC).`, 'warn');
+    function masterControl(cmd) {
+        if (cmd === 'play_playlist' || cmd === 'stop') {
+            saveDataToCloud(cmd);
+            if(cmd === 'play_playlist') screenFlash();
+        } else {
+            // بۆ Pause و Resume
+            db.ref("system/mcr_data").update({ command: cmd, timestamp: Date.now() });
+            log(`ناردنی فەرمانی [${cmd}] بۆ سێرڤەر...`, 'warn');
         }
-        
-        setTimeout(() => { tk.disabled = false; ct.disabled = false; }, 1000);
     }
 </script>
 </body>
