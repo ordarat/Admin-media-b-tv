@@ -2,207 +2,223 @@
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LiveZon QUANTUM MCR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveZon Studio - OBS Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700&display=swap');
         
         :root {
-            --bg-base: #02040a; --panel-bg: rgba(6, 10, 20, 0.9); --panel-border: rgba(0, 150, 255, 0.3);
-            --neon-blue: #00e5ff; --neon-red: #ff003c; --neon-green: #00ff66; --neon-gold: #ffd700;
-            --text-main: #e2f1f8; --text-muted: #5c7c8f;
+            --bg-dark: #121212; --bg-panel: #1e1e1e; --bg-input: #2d2d2d;
+            --border-color: #333; --accent-blue: #0078d7; --accent-hover: #005a9e;
+            --pvw-green: #28a745; --pgm-red: #dc3545; --text-main: #e0e0e0; --text-muted: #888;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-base); background-image: radial-gradient(circle at 50% -20%, #06152d 0%, #02040a 100%); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        
-        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-box { background: var(--panel-bg); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.2); backdrop-filter: blur(10px); text-align: center;}
-        .login-box h1 { font-family: 'Orbitron', sans-serif; color: #fff; margin-bottom: 30px; text-shadow: 0 0 10px var(--neon-blue);}
-        .login-box h1 span { color: var(--neon-blue); }
-        .login-box input { width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border); color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 16px; text-align: left; direction: ltr;}
-        .login-box input:focus { outline: none; border-color: var(--neon-blue); }
-        .login-box .btn-login { width: 100%; background: rgba(0, 229, 255, 0.2); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-weight: bold; font-size: 16px; border-radius: 6px; cursor: pointer; transition: 0.3s;}
-        .login-error { color: var(--neon-red); margin-top: 15px; font-size: 14px; font-weight: bold; display: none; }
 
-        #appContainer { display: none; width: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;}
+        body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { width: 100%; max-width: 1600px; display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg); padding: 15px 20px; border-radius: 12px; border: 1px solid var(--panel-border); box-shadow: 0 0 20px rgba(0, 229, 255, 0.1); margin-bottom: 15px; backdrop-filter: blur(10px); box-sizing: border-box; flex-wrap: wrap; gap: 15px;}
-        .logo-area h1 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: clamp(20px, 4vw, 26px); color: #fff; text-shadow: 0 0 10px var(--neon-blue); display: flex; align-items: center; gap: 10px;}
-        .logo-area span { color: var(--neon-blue); }
+        /* Login Screen */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 40px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-input); border: 1px solid var(--border-color); color: white; border-radius: 4px; box-sizing: border-box; text-align: left; direction: ltr; }
+        .btn-login { width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* Top Bar */
+        .top-bar { background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; box-sizing: border-box; }
+        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 20px; color: white; letter-spacing: 1px; }
+        .brand span { color: var(--accent-blue); }
+        .status-indicators { display: flex; gap: 15px; align-items: center; }
+        .badge { padding: 4px 10px; border-radius: 3px; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; }
+        .badge-live { background: transparent; border: 1px solid var(--pgm-red); color: var(--pgm-red); }
+        .badge-live.active { background: var(--pgm-red); color: white; box-shadow: 0 0 10px var(--pgm-red); animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.7; } }
+
+        /* Main Workspace */
+        .workspace { display: flex; flex-direction: column; flex: 1; padding: 10px; gap: 10px; overflow: hidden; }
+
+        /* Monitors Section */
+        .monitors-row { display: flex; gap: 10px; height: 45%; }
+        .monitor-container { flex: 1; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; }
+        .monitor-header { padding: 5px 15px; font-weight: bold; font-family: 'Orbitron'; font-size: 14px; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .pvw-header { background: rgba(40, 167, 69, 0.1); color: var(--pvw-green); }
+        .pgm-header { background: rgba(220, 53, 69, 0.1); color: var(--pgm-red); }
+        .screen { flex: 1; background: black; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .screen iframe { width: 100%; height: 100%; border: none; }
         
-        .status-radar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;}
-        .cloud-sync { color: var(--text-muted); font-size: 20px; transition: 0.3s; }
-        .cloud-sync.synced { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
-        .cloud-sync.syncing { color: var(--neon-gold); animation: pulse 1s infinite; }
+        /* Transition Bar */
+        .transition-bar { display: flex; justify-content: center; gap: 15px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .btn-trans { padding: 8px 25px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; transition: 0.2s; }
+        .btn-cut { background: var(--bg-input); color: white; border: 1px solid var(--border-color); }
+        .btn-cut:hover { background: #444; }
+        .btn-take { background: var(--pgm-red); color: white; font-size: 16px; padding: 8px 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-take:hover { background: #ff4757; }
+
+        /* Bottom Panels Grid */
+        .panels-row { display: flex; gap: 10px; height: calc(55% - 70px); }
+        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; }
+        .panel-title { padding: 10px 15px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-size: 14px; color: var(--accent-blue); display: flex; justify-content: space-between; }
+        .panel-content { padding: 10px; overflow-y: auto; flex: 1; }
         
-        .uptime-tracker { font-family: 'Orbitron', monospace; font-size: clamp(14px, 3vw, 18px); font-weight: bold; color: var(--neon-gold); border: 1px solid var(--neon-gold); padding: 5px 10px; border-radius: 4px; background: rgba(255, 215, 0, 0.1); text-shadow: 0 0 5px var(--neon-gold); display: none; }
-        .air-status { background: rgba(255,0,60,0.1); color: var(--neon-red); padding: 8px 15px; border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: clamp(12px, 3vw, 16px); font-weight: 900; border: 1px solid var(--neon-red); letter-spacing: 2px; transition: 0.3s; }
-        .air-status.live { background: var(--neon-red); color: white; box-shadow: 0 0 20px var(--neon-red); animation: pulse-red 1s infinite; }
-        
-        .injector-bar { width: 100%; max-width: 1600px; background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue); border-radius: 8px; padding: 10px 15px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-sizing: border-box; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1); }
-        .injector-bar input { flex: 1; min-width: 250px; background: #000; border: 1px solid rgba(0, 229, 255, 0.3); color: var(--neon-blue); padding: 12px; border-radius: 4px; font-family: monospace; font-size: 16px;}
-        .btn-override { background: rgba(255, 0, 60, 0.2); color: var(--neon-red); border: 1px solid var(--neon-red); padding: 12px 20px; font-family: 'Orbitron'; font-weight: 900; border-radius: 4px; cursor: pointer; transition: 0.2s; white-space: nowrap; flex: 1;}
-        .btn-override:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
-        
-        .grid-container { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 20px; width: 100%; max-width: 1600px; }
-        @media (max-width: 1200px) { .grid-container { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 850px) { .grid-container { grid-template-columns: 1fr; } }
-        
-        .glass-panel { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 15px; backdrop-filter: blur(10px); box-shadow: inset 0 0 15px rgba(0, 150, 255, 0.05); display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .panel-title { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--neon-blue); border-bottom: 1px solid rgba(0, 229, 255, 0.3); padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
-        
-        label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; font-weight: bold;}
-        input[type="text"], input[type="number"], input[type="time"], select { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 229, 255, 0.2); color: #fff; border-radius: 4px; margin-bottom: 15px; font-size: 16px; font-family: 'Segoe UI'; box-sizing: border-box; text-align: right; direction: rtl;}
-        input:focus, select:focus { outline: none; border-color: var(--neon-blue); }
-        .row { display: flex; gap: 10px; flex-wrap: wrap;} .col { flex: 1; min-width: 90px;}
-        
-        .btn { padding: 12px; border: none; border-radius: 4px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; transition: 0.2s; letter-spacing: 1px;}
-        .btn-add { background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); width: 100%;}
-        .btn-add:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
-        .btn-save { background: rgba(0, 255, 102, 0.1); border: 1px solid var(--neon-green); color: var(--neon-green); width: 100%; margin-top: 10px; font-family: 'Segoe UI', Tahoma;}
-        .btn-save:hover { background: var(--neon-green); color: #000; }
-        
-        .action-bar { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;}
-        .btn-take { background: rgba(0, 255, 102, 0.1); border: 1px solid var(--neon-green); color: var(--neon-green); flex: 2; font-size: 16px; padding: 15px; min-width: 200px;}
-        .btn-take:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
-        .btn-cut { background: rgba(255, 0, 60, 0.1); border: 1px solid var(--neon-red); color: var(--neon-red); flex: 1; font-size: 16px; padding: 15px; min-width: 120px;}
-        .btn-cut:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 20px var(--neon-red); }
-        
-        .monitor-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; border-radius: 6px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;}
-        .monitor-box iframe { width: 100%; height: 100%; border: none; }
-        .monitor-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 10px; font-family: 'Orbitron', sans-serif; font-size: 11px; border: 1px solid var(--neon-red); border-radius: 3px; z-index: 10; color: var(--neon-red);}
-        
-        .list-box { max-height: 500px; overflow-y: auto; padding-right: 5px; margin-bottom: 10px;}
-        .list-box::-webkit-scrollbar { width: 4px; } .list-box::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
-        
-        .play-item { background: rgba(0,0,0,0.6); border: 1px solid rgba(0,229,255,0.2); padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); position: relative; display: flex; flex-direction: column; gap: 8px;}
-        
-        .item-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;}
-        .i-title { background: transparent; border: none; color: #fff; font-weight: bold; flex: 1; min-width: 100px; font-size: 15px; margin: 0; padding: 0;}
-        .time-badge { background: #000; border: 1px solid rgba(0,229,255,0.3); color: var(--neon-blue); font-size: 11px; padding: 3px 6px; font-family: 'Orbitron', monospace; border-radius: 3px;}
-        
-        .time-label { font-size: 10px; color: var(--neon-blue); width: 100%; display: block; margin-bottom: 2px;}
-        .time-label.end { color: var(--neon-red); }
-        
-        .btn-icon { background: none; color: var(--text-muted); border: none; cursor: pointer; padding: 5px 10px; font-size: 16px;}
-        .btn-icon:hover { color: var(--neon-red); }
-        
-        .terminal { background: rgba(0,0,0,0.8); border: 1px solid var(--panel-border); border-radius: 8px; padding: 15px; height: 130px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; width: 100%; max-width: 1600px; box-sizing: border-box; margin-top: 15px; box-shadow: inset 0 0 20px #000;}
-        .log { margin: 4px 0; border-bottom: 1px dashed #222; padding-bottom: 4px;}
-        .tc { color: #555; margin-left: 10px; font-size: 11px;}
-        .t-sys { color: var(--neon-blue); } .t-err { color: var(--neon-red); } .t-ok { color: var(--neon-green); } .t-warn { color: var(--neon-gold); }
-        
-        .flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 255, 102, 0.2); z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
-        .flash-overlay.active { opacity: 1; }
+        /* Specific Panels */
+        .scenes-panel { flex: 2; }
+        .mixer-panel { flex: 1; }
+        .graphics-panel { flex: 1.5; }
+
+        /* Inputs & Buttons inside panels */
+        label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px; margin-top: 10px; }
+        input[type="text"], select { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
+        .btn-action { background: var(--bg-input); color: white; border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 3px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-action:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
+
+        /* Audio Mixer Sliders */
+        .mixer-track { background: var(--bg-input); padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 10px; border-left: 4px solid var(--accent-blue); }
+        .track-name { font-size: 12px; font-weight: bold; margin-bottom: 10px; color: #aaa; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 10px; background: white; cursor: pointer; border-radius: 2px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #111; border-radius: 3px; border: 1px solid #444; }
+
+        /* Playlist / Scenes List */
+        .scene-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 8px 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: grab; border-left: 3px solid transparent; }
+        .scene-item:hover { border-left-color: var(--text-muted); }
+        .scene-item.active-pvw { border-left-color: var(--pvw-green); }
+        .scene-item.active-pgm { border-left-color: var(--pgm-red); }
+        .scene-title { font-size: 13px; font-weight: bold; flex: 1; }
+        .scene-controls button { background: none; border: none; color: var(--text-muted); cursor: pointer; }
+        .scene-controls button:hover { color: white; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-panel); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 <body>
 
+<!-- Login -->
 <div id="loginScreen">
     <div class="login-box">
-        <h1><i class="fa-solid fa-shield-halved"></i> LiveZon <span>QUANTUM</span></h1>
-        <input type="email" id="loginEmail" placeholder="ئیمەیڵی ئەدمین">
-        <input type="password" id="loginPass" placeholder="تێپەڕوشە (Password)">
-        <button class="btn-login" onclick="login()"><i class="fa-solid fa-right-to-bracket"></i> چوونەژوورەوە</button>
-        <div class="login-error" id="loginError">زانیارییەکان هەڵەن!</div>
+        <h2 style="font-family:'Orbitron'; margin-bottom: 20px;">LiveZon <span>STUDIO</span></h2>
+        <input type="email" id="loginEmail" placeholder="ئیمەیڵ">
+        <input type="password" id="loginPass" placeholder="تێپەڕوشە">
+        <button class="btn-login" onclick="login()">چوونەژوورەوە</button>
     </div>
 </div>
 
-<div id="appContainer">
-    <div class="flash-overlay" id="flashOverlay"></div>
-
-    <div class="header">
-        <div class="logo-area"><h1><i class="fa-solid fa-bolt"></i> LIVEZON <span>QUANTUM MCR</span></h1></div>
-        <div class="status-radar">
-            <i class="fa-solid fa-cloud cloud-sync" id="cloudIcon" title="دۆخی داتابەیس"></i>
-            <button class="btn-icon" style="background: rgba(255,0,0,0.1); border: 1px solid var(--neon-red); border-radius: 4px; color: var(--neon-red); padding: 5px 10px;" onclick="logout()"><i class="fa-solid fa-power-off"></i> دەرچوون</button>
-            <div class="uptime-tracker" id="uptimeDisplay">UPTIME: 00:00:00</div>
-            <div class="air-status" id="airBadge">OFFLINE</div>
+<!-- Main App -->
+<div id="appContainer" style="display: none; height: 100%;">
+    <!-- Header -->
+    <div class="top-bar">
+        <div class="brand"><i class="fa-solid fa-video"></i> LIVEZON <span>STUDIO</span></div>
+        <div class="status-indicators">
+            <span id="syncStatus" style="color: var(--text-muted);"><i class="fa-solid fa-cloud"></i></span>
+            <div id="airBadge" class="badge badge-live">OFFLINE</div>
+            <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
     </div>
 
-    <div class="injector-bar">
-        <i class="fa-solid fa-bolt" style="color: var(--neon-blue); font-size: 20px;"></i>
-        <input type="text" id="quickUrl" placeholder="لینکێکی ڤیدیۆ لێرە دابنێ بۆ دەستێوەردانی خێرا بەبێ ڕیزبەندی..." dir="ltr">
-        <button class="btn-override" onclick="quickInject()"><i class="fa-solid fa-forward-fast"></i> OVERRIDE / هەواڵی بەپەلە</button>
-    </div>
+    <div class="workspace">
+        <!-- Monitors -->
+        <div class="monitors-row">
+            <!-- PVW -->
+            <div class="monitor-container" style="border: 2px solid var(--pvw-green);">
+                <div class="monitor-header pvw-header">PREVIEW (PVW)</div>
+                <div class="screen">
+                    <div style="color: #444; font-family: 'Orbitron'; font-size: 24px; position: absolute; z-index: 0;">NO SIGNAL</div>
+                    <iframe id="pvwScreen" style="position: relative; z-index: 1;"></iframe>
+                </div>
+            </div>
+            
+            <!-- PGM -->
+            <div class="monitor-container" style="border: 2px solid var(--pgm-red);">
+                <div class="monitor-header pgm-header">PROGRAM (PGM)</div>
+                <div class="screen">
+                    <div style="color: #444; font-family: 'Orbitron'; font-size: 24px; position: absolute; z-index: 0;">OFF AIR</div>
+                    <iframe id="pgmScreen" style="position: relative; z-index: 1;"></iframe>
+                </div>
+            </div>
+        </div>
 
-    <div class="grid-container">
-        
-        <!-- LEFT: Settings -->
-        <div class="glass-panel">
-            <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> CLOUD SETTINGS</span></div>
-            
-            <label>شریتی هەواڵ (جێگیر)</label>
-            <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا">
-            
-            <label>لۆگۆی کەناڵ (Watermark)</label>
-            <input type="text" id="logoUrl" value="https://i.postimg.cc/Dwwpt9B0/1000034754-removebg-preview.png" dir="ltr">
-            
-            <button class="btn btn-save" onclick="saveSettingsOnly()"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان</button>
+        <!-- Transitions -->
+        <div class="transition-bar">
+            <button class="btn-trans btn-cut" onclick="masterControl('stop')">CUT (STOP)</button>
+            <button class="btn-trans btn-take" onclick="masterControl('play_playlist')">TAKE (PLAY)</button>
         </div>
-        
-        <!-- MIDDLE: Monitor -->
-        <div class="glass-panel">
-            <div class="panel-title"><span><i class="fa-solid fa-tv"></i> PGM MONITOR</span></div>
-            <div class="monitor-box" id="pgmScreen">
-                <div class="monitor-label">LIVE (PGM)</div>
-                <div style="color: #444; font-weight: 900; font-size: clamp(16px, 4vw, 24px); font-family: 'Orbitron';">NO SIGNAL</div>
-            </div>
-            <div class="row">
-                <input type="text" id="monitorUrl" placeholder="لینکی لایڤەکەی ok.ru..." onchange="updatePGM()" style="margin:0;" dir="ltr">
-                <button class="btn btn-add" style="width:auto; padding: 0 20px; margin:0;" onclick="updatePGM()"><i class="fa-solid fa-rotate"></i></button>
-            </div>
-            
-            <!-- قۆپچەی کۆنتڕۆڵ و پۆز/ڕیزوم -->
-            <div class="action-bar">
-                <button class="btn btn-take" id="btnTake" onclick="masterControl('play_playlist')"><i class="fa-solid fa-satellite-dish"></i> EXECUTE (PLAY SCHEDULE)</button>
-                <button class="btn btn-cut" id="btnCut" onclick="masterControl('stop')"><i class="fa-solid fa-skull-crossbones"></i> PANIC (STOP)</button>
-            </div>
-            <div class="action-bar" style="margin-top: 10px;">
-                <button class="btn btn-add" style="border-color: var(--neon-gold); color: var(--neon-gold); flex: 1;" onclick="masterControl('pause')"><i class="fa-solid fa-pause"></i> PAUSE (ڕاگرتن)</button>
-                <button class="btn btn-add" style="border-color: var(--neon-blue); color: var(--neon-blue); flex: 1;" onclick="masterControl('resume')"><i class="fa-solid fa-play"></i> RESUME (دەستپێکردنەوە)</button>
-            </div>
-        </div>
-        
-        <!-- RIGHT: Playlist 7-Day -->
-        <div class="glass-panel">
-            <div class="panel-title">
-                <span><i class="fa-solid fa-list-check"></i> خشتەی ڕۆژانە</span>
-                <span id="totalDur" style="color: var(--neon-blue);">00:00:00</span>
-            </div>
-            
-            <!-- هەڵبژاردنی ڕۆژ -->
-            <label style="color: var(--neon-gold);">پەخشی ڕۆژی:</label>
-            <select id="daySelector" onchange="switchDay(this.value)" style="background: rgba(255, 215, 0, 0.1); border-color: var(--neon-gold); color: var(--neon-gold); font-weight: bold; font-family: 'Orbitron', 'Segoe UI'; text-align: center;">
-                <option value="Saturday">شەممە (Saturday)</option>
-                <option value="Sunday">یەکشەممە (Sunday)</option>
-                <option value="Monday">دووشەممە (Monday)</option>
-                <option value="Tuesday">سێشەممە (Tuesday)</option>
-                <option value="Wednesday">چوارشەممە (Wednesday)</option>
-                <option value="Thursday">پێنجشەممە (Thursday)</option>
-                <option value="Friday">هەینی (Friday)</option>
-            </select>
-            
-            <div id="playlist" class="list-box" style="flex:1;"></div>
-            
-            <button class="btn btn-add" onclick="createItem()" style="margin-top: 10px;"><i class="fa-solid fa-film"></i> ADD MEDIA (زیادکردنی ڤیدیۆ)</button>
-            <button class="btn btn-save" onclick="saveDataToCloud('play_playlist')"><i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی خشتە و پەخشکردن</button>
-        </div>
-    </div>
 
-    <div class="terminal" id="terminal">
-        <div class="log"><span class="t-sys">[SYSTEM]</span> FIREBASE REALTIME DB CONNECTED. QUANTUM SYNC ACTIVE.</div>
+        <!-- Panels -->
+        <div class="panels-row">
+            
+            <!-- Scenes/Playlist -->
+            <div class="panel scenes-panel">
+                <div class="panel-title">
+                    <span><i class="fa-solid fa-layer-group"></i> SCENES / PLAYLIST</span>
+                    <select id="daySelector" onchange="switchDay(this.value)" style="width: auto; padding: 2px; font-size: 11px; background: black;">
+                        <option value="Saturday">شەممە</option>
+                        <option value="Sunday">یەکشەممە</option>
+                        <option value="Monday">دووشەممە</option>
+                    </select>
+                </div>
+                <div class="panel-content" id="playlist">
+                    <!-- Items generated by JS -->
+                </div>
+                <div style="padding: 10px; border-top: 1px solid var(--border-color);">
+                    <button class="btn-action" onclick="addScene()"><i class="fa-solid fa-plus"></i> ADD MEDIA SOURCE</button>
+                </div>
+            </div>
+
+            <!-- Audio Mixer -->
+            <div class="panel mixer-panel">
+                <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> AUDIO MIXER</span></div>
+                <div class="panel-content">
+                    <div class="mixer-track">
+                        <div class="track-name">MASTER PGM VOL</div>
+                        <input type="range" min="0" max="100" value="100">
+                        <div style="font-size: 10px; color: var(--accent-blue); margin-top: 5px;">0.0 dB</div>
+                    </div>
+                    <div class="mixer-track" style="border-left-color: var(--text-muted);">
+                        <div class="track-name">PREVIEW VOL</div>
+                        <input type="range" min="0" max="100" value="50">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphics & Controls -->
+            <div class="panel graphics-panel">
+                <div class="panel-title"><span><i class="fa-solid fa-object-group"></i> GRAPHICS & OVERLAYS</span></div>
+                <div class="panel-content">
+                    <label>شریتی هەواڵ (TICKER TEXT)</label>
+                    <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا">
+                    
+                    <label>سەرچاوەی لۆگۆ (WATERMARK URL)</label>
+                    <input type="text" id="logoUrl" value="https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png" dir="ltr">
+                    
+                    <label>لینکی چاودێری (MONITOR URL)</label>
+                    <input type="text" id="monitorUrl" placeholder="لینکی ok.ru" onchange="updateMonitors()" dir="ltr">
+                    
+                    <button class="btn-action" style="background: rgba(40,167,69,0.2); border-color: var(--pvw-green); color: var(--pvw-green);" onclick="saveDataToCloud('update_settings')">
+                        <i class="fa-solid fa-floppy-disk"></i> SAVE GRAPHICS & SETTINGS
+                    </button>
+                    
+                    <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 20px 0;">
+                    
+                    <label style="color: var(--pgm-red);"><i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE (هەواڵی بەپەلە)</label>
+                    <input type="text" id="quickUrl" placeholder="لینکی ڤیدیۆی بەپەلە لێرە دابنێ..." dir="ltr">
+                    <button class="btn-action" style="background: rgba(220,53,69,0.2); border-color: var(--pgm-red); color: var(--pgm-red);" onclick="quickInject()">
+                        <i class="fa-solid fa-forward-fast"></i> INJECT NOW
+                    </button>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
 <script>
+    // --- هەمان کۆدی فایەربەیسی پێشووە بەبێ گۆڕانکاری بۆ ئەوەی ڕاستەوخۆ کار بکات ---
     const firebaseConfig = {
         apiKey: "AIzaSyA_CyVB1f9UCHG_FMmYDSqG3oLGkohfE80",
         authDomain: "media-bagera-63d90.firebaseapp.com",
@@ -219,30 +235,17 @@
     const db = firebase.database(); 
     
     let isLive = false;
-    let streamStartTime = null;
-    let uptimeInterval = null;
-    let isInitialLoad = true; 
-    
-    // کۆگای زانیارییەکانی ٧ ڕۆژی هەفتە
-    let weeklySchedule = {
-        "Saturday": [], "Sunday": [], "Monday": [], "Tuesday": [],
-        "Wednesday": [], "Thursday": [], "Friday": []
-    };
+    let isInitialLoad = true;
     let currentEditingDay = "Saturday";
-
-    // دیاریکردنی ڕۆژی ئەمڕۆ
+    let weeklySchedule = { "Saturday": [], "Sunday": [], "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [] };
     const daysArr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    
+
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
-            log(`چوونەژوورەوەی ئەدمین سەرکەوتوو بوو.`, 'ok');
-            
-            // دانانی ڕۆژی ئەمڕۆ وەک دیفۆڵت لە داشبۆردەکە
             currentEditingDay = daysArr[new Date().getDay()];
             document.getElementById('daySelector').value = currentEditingDay;
-            
             loadDataFromCloud();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
@@ -253,114 +256,100 @@
     function login() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPass').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(() => { document.getElementById('loginError').style.display = 'block'; });
+        auth.signInWithEmailAndPassword(email, pass).catch(() => alert('زانیارییەکان هەڵەن'));
     }
 
     function logout() { auth.signOut(); }
 
-    function setCloudStatus(status) {
-        const icon = document.getElementById('cloudIcon');
-        if(status === 'syncing') icon.className = 'fa-solid fa-cloud cloud-sync syncing';
-        else if (status === 'synced') icon.className = 'fa-solid fa-cloud-check cloud-sync synced';
-    }
-
     function loadDataFromCloud() {
-        setCloudStatus('syncing');
-        
+        document.getElementById('syncStatus').style.color = 'var(--accent-blue)';
         db.ref("system/mcr_data").on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 let parsedData = {};
                 try { parsedData = JSON.parse(d.payload || "{}"); } catch(e) {}
                 
-                if(d.command === 'play_playlist' && !isLive) {
+                if(d.command === 'play_playlist' || d.command === 'override') {
                     setLiveStatus(true);
-                } else if (d.command === 'stop' && isLive) {
+                } else if (d.command === 'stop') {
                     setLiveStatus(false);
                 }
 
                 if (isInitialLoad) {
-                    document.getElementById('tickerText').value = parsedData.t || ''; 
-                    document.getElementById('logoUrl').value = parsedData.l || '';
+                    document.getElementById('tickerText').value = parsedData.t || 'بەخێربێن بۆ کەناڵی میدیا باگێرا'; 
+                    document.getElementById('logoUrl').value = parsedData.l || 'https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png';
                     document.getElementById('monitorUrl').value = parsedData.m || '';
-                    
-                    if (parsedData.schedule) {
-                        weeklySchedule = Object.assign(weeklySchedule, parsedData.schedule);
-                    }
+                    if (parsedData.schedule) weeklySchedule = Object.assign(weeklySchedule, parsedData.schedule);
                     
                     renderPlaylistForDay(currentEditingDay);
-                    updatePGM();
-                    log('داتاکان لە فایەربەیسەوە خوێندرانەوە.', 'ok');
+                    updateMonitors();
                     isInitialLoad = false;
                 }
             }
-            setCloudStatus('synced');
+            setTimeout(() => document.getElementById('syncStatus').style.color = 'var(--text-muted)', 500);
         });
     }
 
-    // گۆڕینی ڕۆژ لە داشبۆردەکە
     function switchDay(selectedDay) {
-        // سەرەتا لیستەکەی ئێستا خەزن دەکەین بۆ ناو مێمۆری
         weeklySchedule[currentEditingDay] = getListData();
-        // پاشان ڕۆژە تازەکە دەهێنینە پێشەوە
         currentEditingDay = selectedDay;
         renderPlaylistForDay(currentEditingDay);
-        log(`خشتەی ڕۆژی [${selectedDay}] کرایەوە.`, 'sys');
     }
 
     function renderPlaylistForDay(day) {
         document.getElementById('playlist').innerHTML = '';
         const items = weeklySchedule[day] || [];
-        items.forEach(x => createItem(x));
-        calcTime();
-    }
-
-    function calculateDuration(inputElem) {
-        const item = inputElem.closest('.play-item');
-        const startVal = item.querySelector('.i-time-start').value;
-        const endVal = item.querySelector('.i-time-end').value;
-        const durInput = item.querySelector('.i-dur');
-        const durDisplay = item.querySelector('.dur-display');
-        
-        if(startVal && endVal) {
-            const [sH, sM] = startVal.split(':').map(Number);
-            const [eH, eM] = endVal.split(':').map(Number);
-            
-            let startMins = sH * 60 + sM;
-            let endMins = eH * 60 + eM;
-            
-            if(endMins <= startMins) endMins += 24 * 60;
-            
-            const diffMins = endMins - startMins;
-            const diffSeconds = diffMins * 60;
-            
-            durInput.value = diffSeconds; 
-            durDisplay.innerText = diffSeconds + " چرکە";
-        }
+        items.forEach(x => createSceneHTML(x));
     }
 
     function getListData() {
         const arr = [];
-        document.querySelectorAll(`#playlist .play-item`).forEach(el => {
-            const url = el.querySelector('.i-url').value;
-            if(url) {
-                arr.push({ 
-                    url: url, 
-                    title: el.querySelector('.i-title').value, 
-                    timeStart: el.querySelector('.i-time-start').value,
-                    timeEnd: el.querySelector('.i-time-end').value,
-                    duration: el.querySelector('.i-dur').value // بە چرکە
-                });
-            }
+        document.querySelectorAll(`.scene-item`).forEach(el => {
+            arr.push({ 
+                url: el.querySelector('.i-url').value, 
+                title: el.querySelector('.i-title').value, 
+                duration: el.querySelector('.i-dur').value 
+            });
         });
         return arr;
     }
 
+    function addScene() {
+        createSceneHTML({ title: "ڤیدیۆی نوێ", duration: 3600, url: "" });
+    }
+
+    function createSceneHTML(data) {
+        const id = Date.now() + Math.floor(Math.random()*100);
+        const html = `
+        <div class="scene-item" id="${id}">
+            <i class="fa-solid fa-grip-vertical drag-handle" style="color: #555; cursor: grab; margin-left: 10px;"></i>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
+                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی سەرچاوە (Source)" style="background: transparent; border: none; font-weight: bold; padding: 0;">
+                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ..." dir="ltr" style="font-size: 11px; padding: 4px;">
+                <input type="hidden" class="i-dur" value="${data.duration || 3600}">
+            </div>
+            <div class="scene-controls">
+                <button onclick="this.closest('.scene-item').remove()"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+        document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.drag-handle' });
+    });
+
+    function updateMonitors() {
+        const url = document.getElementById('monitorUrl').value.trim();
+        if(url.includes('ok.ru')) {
+            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
+            document.getElementById('pgmScreen').src = fUrl;
+            document.getElementById('pvwScreen').src = fUrl; // For now, PVW mirrors PGM until WebRTC backend is built
+        }
+    }
+
     function saveDataToCloud(commandOverride = null) {
         if (isInitialLoad) return;
-        setCloudStatus('syncing');
-        
-        // خەزنکردنی ئەوەی ئێستا لەسەر شاشەی داشبۆردە بۆ ناو مێمۆری ٧ ڕۆژەکە
         weeklySchedule[currentEditingDay] = getListData();
         
         const data = {
@@ -370,157 +359,38 @@
             schedule: weeklySchedule 
         };
         
-        const payloadStr = JSON.stringify(data);
         const cmd = commandOverride || 'play_playlist';
-
-        db.ref("system/mcr_data").set({
-            payload: payloadStr,
-            command: cmd,
-            timestamp: Date.now()
-        }).then(() => {
-            setCloudStatus('synced');
-            log(`هەموو خشتەکان پاشەکەوت کران و فەرمانی [${cmd}] نێردرا.`, 'ok');
-        });
+        db.ref("system/mcr_data").set({ payload: JSON.stringify(data), command: cmd, timestamp: Date.now() });
     }
 
-    function saveSettingsOnly() {
-        saveDataToCloud('update_settings');
-        alert('ڕێکخستنەکان خەزن کران.');
+    function masterControl(cmd) {
+        saveDataToCloud(cmd);
     }
-
-    function log(msg, type='sys') {
-        const term = document.getElementById('terminal');
-        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-        const cClass = type==='ok' ? 't-ok' : type==='err' ? 't-err' : type==='warn' ? 't-warn' : 't-sys';
-        term.insertAdjacentHTML('beforeend', `<div class="log"><span class="${cClass}">[${type.toUpperCase()}]</span> ${msg} <span class="tc">${time}</span></div>`);
-        term.scrollTop = term.scrollHeight;
-    }
-
-    function screenFlash(color = 'rgba(0, 255, 102, 0.2)') {
-        const overlay = document.getElementById('flashOverlay');
-        overlay.style.background = color; overlay.classList.add('active');
-        setTimeout(() => overlay.classList.remove('active'), 200);
-    }
-
-    function updatePGM() {
-        const url = document.getElementById('monitorUrl').value.trim();
-        const pgm = document.getElementById('pgmScreen');
-        if(url.includes('ok.ru')) {
-            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
-            pgm.innerHTML = `<div class="monitor-label">LIVE (PGM)</div><iframe src="${fUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-        }
-    }
-
-    function createItem(data = {}) {
-        const id = Date.now() + Math.floor(Math.random()*100);
-        const durSec = data.duration || 3600; // ٦٠ خولەک وەکو دیفۆڵت
-        
-        const html = `
-        <div class="play-item" id="${id}">
-            <div class="item-top">
-                <i class="fa-solid fa-grip-lines drag-handle" style="color: var(--text-muted); cursor: grab; padding: 5px;"></i>
-                <input type="text" class="i-title" placeholder="ناوی کەناڵ یان ڤیدیۆ..." value="${data.title || ''}">
-                <div class="time-badge dur-display">${durSec} چرکە</div>
-                <button class="btn-icon" onclick="this.closest('.play-item').remove(); calcTime();"><i class="fa-solid fa-trash"></i></button>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <span class="time-label">دەستپێک:</span>
-                    <input type="time" class="i-time-start" value="${data.timeStart || ''}" onchange="calculateDuration(this); calcTime();" style="margin:0;" dir="ltr">
-                </div>
-                <div class="col">
-                    <span class="time-label end">کۆتایی:</span>
-                    <input type="time" class="i-time-end" value="${data.timeEnd || ''}" onchange="calculateDuration(this); calcTime();" style="margin:0;" dir="ltr">
-                </div>
-                <!-- ماوەی ڤیدیۆ بە چرکە (بۆ سێرڤەر گرنگە) -->
-                <input type="hidden" class="i-dur" value="${durSec}">
-            </div>
-            <input type="text" class="i-url" placeholder="لینکی m3u8 یان mp4..." value="${data.url || ''}" dir="ltr" style="margin-top: 10px; margin-bottom:0;">
-        </div>`;
-        document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
-        calcTime();
-    }
-
-    function calcTime() {
-        let seconds = 0;
-        document.querySelectorAll('#playlist .play-item').forEach(el => {
-            const s = parseInt(el.querySelector('.i-dur').value) || 0;
-            seconds += s;
-        });
-        
-        const h = String(Math.floor(seconds / 3600)).padStart(2,'0');
-        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2,'0');
-        const s = String(seconds % 60).padStart(2,'0');
-        
-        document.getElementById('totalDur').innerText = `${h}:${m}:${s}`;
-    }
-
-    // فەرمانی لێدانی هەواڵی بەپەلە (Override)
-    function quickInject() {
-        const urlInput = document.getElementById('quickUrl');
-        const url = urlInput.value.trim();
-        if(!url) return alert("تکایە سەرەتا لینکێک دابنێ!");
-        
-        const payloadStr = JSON.stringify({
-            play: [{ url: url, title: "بەپەلە (Override)", duration: 3600 }], // ١ کاتژمێر کاتی پێ دەدەین
-            n: "Media Bagera TV",
-            l: document.getElementById('logoUrl').value
-        });
-        
-        db.ref("system/mcr_data").set({
-            payload: payloadStr,
-            command: 'override',
-            timestamp: Date.now()
-        });
-        
-        screenFlash('rgba(255, 0, 60, 0.2)');
-        log(`[OVERRIDE] لینکێکی بەپەلە نێردرا. خشتەکە ڕاگیرا و پەخشی نوێ دەستی پێکرد!`, 'warn');
-        urlInput.value = '';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.drag-handle', onEnd: () => { calcTime(); } });
-    });
 
     function setLiveStatus(status) {
         isLive = status;
         const badge = document.getElementById("airBadge");
-        const uptimeDisp = document.getElementById("uptimeDisplay");
-        
         if (status) {
-            badge.innerText = 'ON AIR'; badge.className = 'air-status live';
-            uptimeDisp.style.display = 'block';
-            if(!streamStartTime) streamStartTime = Date.now();
-            startUptimeCounter();
+            badge.innerText = 'LIVE (ON AIR)'; badge.className = 'badge badge-live active';
         } else {
-            badge.innerText = 'OFFLINE'; badge.className = 'air-status'; 
-            uptimeDisp.style.display = 'none';
-            streamStartTime = null;
-            clearInterval(uptimeInterval);
+            badge.innerText = 'OFFLINE'; badge.className = 'badge badge-live'; 
         }
     }
 
-    function startUptimeCounter() {
-        clearInterval(uptimeInterval);
-        uptimeInterval = setInterval(() => {
-            if (!isLive || !streamStartTime) return;
-            const diffMs = Date.now() - streamStartTime;
-            const h = String(Math.floor(diffMs / 3600000)).padStart(2, '0');
-            const m = String(Math.floor((diffMs % 3600000) / 60000)).padStart(2, '0');
-            const s = String(Math.floor((diffMs % 60000) / 1000)).padStart(2, '0');
-            document.getElementById('uptimeDisplay').innerText = `UPTIME: ${h}:${m}:${s}`;
-        }, 1000);
-    }
-
-    function masterControl(cmd) {
-        if (cmd === 'play_playlist' || cmd === 'stop') {
-            saveDataToCloud(cmd);
-            if(cmd === 'play_playlist') screenFlash();
-        } else {
-            // بۆ Pause و Resume
-            db.ref("system/mcr_data").update({ command: cmd, timestamp: Date.now() });
-            log(`ناردنی فەرمانی [${cmd}] بۆ سێرڤەر...`, 'warn');
-        }
+    function quickInject() {
+        const url = document.getElementById('quickUrl').value.trim();
+        if(!url) return alert("سەرەتا لینک دابنێ!");
+        
+        db.ref("system/mcr_data").set({
+            payload: JSON.stringify({
+                play: [{ url: url, title: "بەپەلە (Override)", duration: 3600 }],
+                n: "Media Bagera TV",
+                l: document.getElementById('logoUrl').value
+            }),
+            command: 'override',
+            timestamp: Date.now()
+        });
+        document.getElementById('quickUrl').value = '';
     }
 </script>
 </body>
