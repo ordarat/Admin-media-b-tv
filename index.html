@@ -164,7 +164,7 @@
                 </div>
                 <div class="panel-content" id="playlist" style="max-height: 200px;"></div>
                 <div style="padding: 10px; border-top: 1px solid var(--border-color);">
-                    <button class="btn-action" style="margin-top:0;" onclick="addScene()"><i class="fa-solid fa-plus"></i> زیادکردنی ڤیدیۆ بۆ خشتە</button>
+                    <button class="btn-action" style="margin-top:0;" onclick="addScene()"><i class="fa-solid fa-plus"></i> زیادکردنی لایڤ بۆ خشتە</button>
                 </div>
             </div>
 
@@ -174,7 +174,7 @@
                 <div class="panel-content">
                     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                         <input type="text" id="adUrl" placeholder="لینکی ڤیدیۆی ڕیکلام..." dir="ltr" style="flex: 2; margin:0;">
-                        <input type="number" id="adDuration" value="30" placeholder="ماوە (چرکە)" style="flex: 1; margin:0;" title="ماوە بە چرکە">
+                        <input type="number" id="adDuration" value="30" placeholder="ماوە (چرکە)" style="flex: 1; margin:0;" title="ماوەی ڕیکلام بە چرکە">
                     </div>
                     <button class="btn-action" style="background: rgba(234, 179, 8, 0.15); border-color: var(--ad-yellow); color: var(--ad-yellow); margin-top: 5px;" onclick="playAd()">
                         <i class="fa-solid fa-play"></i> ROLL AD (پەخشکردنی ڕیکلام)
@@ -216,14 +216,6 @@
                     <button class="btn-action" style="background: rgba(16, 185, 129, 0.2); border-color: var(--pvw-green); color: var(--pvw-green);" onclick="saveDataToCloud('update_settings')">
                         <i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان
                     </button>
-                    
-                    <hr style="border: 1px dashed var(--border-color); margin: 15px 0;">
-                    
-                    <label style="color: var(--pgm-red);"><i class="fa-solid fa-bolt"></i> OVERRIDE (هەواڵی بەپەلە - بێ گەڕانەوە)</label>
-                    <input type="text" id="quickUrl" placeholder="لینکی ڤیدیۆ بۆ دەستوەردانی خێرا..." dir="ltr">
-                    <button class="btn-action" style="background: rgba(239, 68, 68, 0.2); border-color: var(--pgm-red); color: var(--pgm-red);" onclick="quickInject()">
-                        <i class="fa-solid fa-forward-fast"></i> INJECT NOW
-                    </button>
                 </div>
             </div>
         </div>
@@ -255,7 +247,6 @@
     let isInitialLoad = true;
     let masterPlaylist = [];
 
-    // کاتژمێری ستۆدیۆ
     setInterval(() => {
         const now = new Date();
         document.getElementById('studioClock').innerText = now.toLocaleTimeString('en-GB');
@@ -339,7 +330,7 @@
     }
 
     function addScene() {
-        createSceneHTML({ title: "ڤیدیۆی نوێ", duration: 3600, url: "" });
+        createSceneHTML({ title: "پەخشی سەرەکی", duration: 24, url: "" });
     }
 
     function createSceneHTML(data) {
@@ -348,15 +339,16 @@
         <div class="scene-item" id="${id}">
             <div class="scene-top">
                 <i class="fa-solid fa-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
-                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی ڤیدیۆ...">
+                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی پەخش...">
                 <div class="scene-controls">
                     <button class="btn-pvw" onclick="sendToPreview(this)" title="ناردن بۆ پێشبینین">PVW</button>
                     <button class="btn-del" onclick="this.closest('.scene-item').remove();"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
             <div class="scene-bottom">
-                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ (m3u8/mp4)..." dir="ltr" style="flex: 2;">
-                <input type="number" class="i-dur" value="${data.duration || 3600}" placeholder="ماوە (چرکە)" style="flex: 1;" title="ماوە بە چرکە">
+                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ یان m3u..." dir="ltr" style="flex: 2;">
+                <!-- گۆڕانکاری بۆ کاتژمێر لێرە کراوە -->
+                <input type="number" class="i-dur" value="${data.duration || 24}" placeholder="ماوە (کاتژمێر)" style="flex: 1;" title="ماوە بە کاتژمێر">
             </div>
         </div>`;
         document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
@@ -377,7 +369,7 @@
             document.querySelectorAll('.scene-item').forEach(el => el.style.borderLeftColor = 'transparent');
             item.style.borderLeftColor = 'var(--pvw-green)';
         } else {
-            alert('ببوورە، لە ئێستادا تەنها لینکی ok.ru دەتوانیت پێشبینین بکەیت.');
+            alert('ببوورە، لە ئێستادا تەنها لینکی ok.ru دەتوانیت پێشبینین بکەیت لەناو وێبگەڕەکە.');
         }
     }
 
@@ -494,9 +486,10 @@
         const url = document.getElementById('quickUrl').value.trim();
         if(!url) return alert("تکایە لینکێک دابنێ!");
         
+        // هەواڵی بەپەلە وەکو ڕیکلام بە چرکە نییە، بۆیە بە کاتژمێر (نموونە 1 کاتژمێر) دەینێرین
         db.ref("system/mcr_data").set({
             payload: JSON.stringify({
-                play: [{ url: url, title: "بەپەلە (Override)", duration: 3600 }],
+                play: [{ url: url, title: "بەپەلە (Override)", duration: 1 }], 
                 n: "Media Bagera TV",
                 l: document.getElementById('logoUrl').value
             }),
