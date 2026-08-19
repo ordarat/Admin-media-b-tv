@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveZon Studio - OBS Edition</title>
+    <title>LiveZon Studio - 24/7 Master Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -11,214 +11,232 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700;900&display=swap');
         
         :root {
-            --bg-dark: #121212; --bg-panel: #1e1e1e; --bg-input: #2d2d2d;
-            --border-color: #333; --accent-blue: #0078d7; --accent-hover: #005a9e;
-            --pvw-green: #28a745; --pgm-red: #dc3545; --text-main: #e0e0e0; --text-muted: #888;
+            --bg-dark: #05070c; --bg-panel: #0f172a; --bg-input: #1e293b;
+            --border-color: #334155; --accent-blue: #0ea5e9; --accent-hover: #0284c7;
+            --pvw-green: #10b981; --pgm-red: #ef4444; --ad-yellow: #eab308; --text-main: #f8fafc; --text-muted: #94a3b8;
         }
 
-        body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Login Screen */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 40px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-input); border: 1px solid var(--border-color); color: white; border-radius: 4px; box-sizing: border-box; text-align: left; direction: ltr; }
-        .btn-login { width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .login-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 40px; border-radius: 12px; width: 380px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7); }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-input); border: 1px solid var(--border-color); color: white; border-radius: 6px; box-sizing: border-box; text-align: left; direction: ltr; font-size: 14px; }
+        .btn-login { width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-login:hover { background: var(--accent-hover); }
 
-        /* Top Bar */
-        .top-bar { background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; box-sizing: border-box; }
-        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 20px; color: white; letter-spacing: 1px; }
+        .top-bar { background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 55px; box-sizing: border-box; }
+        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
         .brand span { color: var(--accent-blue); }
+        .center-clock { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: bold; color: var(--accent-blue); letter-spacing: 2px; background: #000; padding: 4px 15px; border-radius: 4px; border: 1px solid var(--border-color); }
         .status-indicators { display: flex; gap: 15px; align-items: center; }
-        .badge { padding: 4px 10px; border-radius: 3px; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; }
+        .badge { padding: 5px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;}
         .badge-live { background: transparent; border: 1px solid var(--pgm-red); color: var(--pgm-red); }
-        .badge-live.active { background: var(--pgm-red); color: white; box-shadow: 0 0 10px var(--pgm-red); animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.7; } }
+        .badge-live.active { background: var(--pgm-red); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); animation: pulse 1.5s infinite; }
+        .badge-loop { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--pvw-green); color: var(--pvw-green); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* Main Workspace */
-        .workspace { display: flex; flex-direction: column; flex: 1; padding: 10px; gap: 10px; overflow: hidden; }
+        .workspace { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr auto; gap: 10px; flex: 1; padding: 10px; overflow: hidden; box-sizing: border-box; }
+        @media(max-width: 1200px) { .workspace { grid-template-columns: 1fr; overflow-y: auto; } }
 
-        /* Monitors Section */
-        .monitors-row { display: flex; gap: 10px; height: 45%; }
-        .monitor-container { flex: 1; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; }
-        .monitor-header { padding: 5px 15px; font-weight: bold; font-family: 'Orbitron'; font-size: 14px; text-align: center; border-bottom: 1px solid var(--border-color); }
-        .pvw-header { background: rgba(40, 167, 69, 0.1); color: var(--pvw-green); }
-        .pgm-header { background: rgba(220, 53, 69, 0.1); color: var(--pgm-red); }
-        .screen { flex: 1; background: black; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .left-column { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .monitors-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 58vh; min-height: 280px; }
+        .monitor-container { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+        .monitor-header { padding: 8px 15px; font-weight: bold; font-family: 'Orbitron'; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border-color); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;}
+        .pvw-header { background: rgba(16, 185, 129, 0.15); color: var(--pvw-green); }
+        .pgm-header { background: rgba(239, 68, 68, 0.15); color: var(--pgm-red); }
+        .screen { flex: 1; background: #000; display: flex; justify-content: center; align-items: center; position: relative; }
         .screen iframe { width: 100%; height: 100%; border: none; }
-        
-        /* Transition Bar */
-        .transition-bar { display: flex; justify-content: center; gap: 15px; background: var(--bg-panel); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .btn-trans { padding: 8px 25px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; transition: 0.2s; }
+
+        .transition-bar { display: flex; justify-content: center; gap: 15px; background: var(--bg-panel); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .btn-trans { padding: 10px 35px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; font-size: 14px; transition: 0.2s; }
         .btn-cut { background: var(--bg-input); color: white; border: 1px solid var(--border-color); }
-        .btn-cut:hover { background: #444; }
-        .btn-take { background: var(--pgm-red); color: white; font-size: 16px; padding: 8px 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .btn-take:hover { background: #ff4757; }
+        .btn-cut:hover { background: #334155; }
+        .btn-take { background: var(--pgm-red); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
+        .btn-take:hover { background: #dc2626; }
 
-        /* Bottom Panels Grid */
-        .panels-row { display: flex; gap: 10px; height: calc(55% - 70px); }
-        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; }
-        .panel-title { padding: 10px 15px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-size: 14px; color: var(--accent-blue); display: flex; justify-content: space-between; }
-        .panel-content { padding: 10px; overflow-y: auto; flex: 1; }
+        .right-column { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px;}
+        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; flex-shrink: 0;}
+        .panel-title { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-family: 'Orbitron'; font-size: 12px; color: var(--accent-blue); display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+        .panel-content { padding: 12px; overflow-y: auto; }
+
+        label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; margin-top: 10px; font-weight: bold; text-transform: uppercase; }
+        input[type="text"], input[type="number"], select { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+        input:focus, select:focus { outline: none; border-color: var(--accent-blue); }
         
-        /* Specific Panels */
-        .scenes-panel { flex: 2; }
-        .mixer-panel { flex: 1; }
-        .graphics-panel { flex: 1.5; }
-
-        /* Inputs & Buttons inside panels */
-        label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px; margin-top: 10px; }
-        input[type="text"], select { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: white; padding: 8px; border-radius: 3px; box-sizing: border-box; font-family: inherit; }
-        .btn-action { background: var(--bg-input); color: white; border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 3px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-action { background: var(--bg-input); color: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-weight: bold; font-size: 13px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-action:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
 
-        /* Audio Mixer Sliders */
-        .mixer-track { background: var(--bg-input); padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 10px; border-left: 4px solid var(--accent-blue); }
-        .track-name { font-size: 12px; font-weight: bold; margin-bottom: 10px; color: #aaa; }
+        .mixer-track { background: var(--bg-input); padding: 12px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid var(--accent-blue); }
+        .track-info { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+        .btn-mute { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--pgm-red); color: var(--pgm-red); border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px; }
+        .btn-mute:hover { background: var(--pgm-red); color: white; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 10px; background: white; cursor: pointer; border-radius: 2px; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #111; border-radius: 3px; border: 1px solid #444; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; background: white; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px #000; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #0f172a; border-radius: 3px; border: 1px solid #333; }
 
-        /* Playlist / Scenes List */
-        .scene-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 8px 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: grab; border-left: 3px solid transparent; }
+        .scene-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px; position: relative; border-left: 3px solid transparent; transition: 0.2s; }
         .scene-item:hover { border-left-color: var(--text-muted); }
-        .scene-item.active-pvw { border-left-color: var(--pvw-green); }
-        .scene-item.active-pgm { border-left-color: var(--pgm-red); }
-        .scene-title { font-size: 13px; font-weight: bold; flex: 1; }
-        .scene-controls button { background: none; border: none; color: var(--text-muted); cursor: pointer; }
-        .scene-controls button:hover { color: white; }
+        .scene-top { display: flex; align-items: center; gap: 8px; }
+        .scene-top input { background: transparent; border: none; font-weight: bold; font-size: 13px; padding: 2px; flex: 1; color: white;}
+        .scene-top input:focus { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
+        .scene-bottom { display: flex; gap: 8px; align-items: center; }
+        .scene-bottom input { font-size: 11px; padding: 8px; }
+        .scene-controls { display: flex; gap: 5px; }
+        .btn-pvw { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--pvw-green); color: var(--pvw-green); border-radius: 4px; font-size: 10px; font-weight: bold; padding: 2px 6px; cursor: pointer; }
+        .btn-pvw:hover { background: var(--pvw-green); color: black; }
+        .btn-del { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
+        .btn-del:hover { color: var(--pgm-red); }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-panel); }
+        .terminal-box { background: #030712; border-top: 1px solid var(--border-color); padding: 10px 20px; font-family: 'Courier New', monospace; font-size: 12px; height: 95px; overflow-y: auto; box-sizing: border-box; flex-shrink: 0; }
+        .log-line { margin-bottom: 4px; color: var(--text-muted); }
+        .log-sys { color: var(--accent-blue); }
+        .log-ok { color: var(--pvw-green); }
+        .log-err { color: var(--pgm-red); }
+        .log-warn { color: var(--ad-yellow); }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 <body>
 
-<!-- Login -->
 <div id="loginScreen">
     <div class="login-box">
-        <h2 style="font-family:'Orbitron'; margin-bottom: 20px;">LiveZon <span>STUDIO</span></h2>
-        <input type="email" id="loginEmail" placeholder="ئیمەیڵ">
+        <h2 style="font-family:'Orbitron'; margin-bottom: 25px; color: white;">LiveZon <span>STUDIO</span></h2>
+        <input type="email" id="loginEmail" placeholder="ئیمەیڵی ئەدمین">
         <input type="password" id="loginPass" placeholder="تێپەڕوشە">
-        <button class="btn-login" onclick="login()">چوونەژوورەوە</button>
+        <button class="btn-login" onclick="login()">چوونەژوورەوە <i class="fa-solid fa-right-to-bracket"></i></button>
     </div>
 </div>
 
-<!-- Main App -->
-<div id="appContainer" style="display: none; height: 100%;">
-    <!-- Header -->
+<div id="appContainer" style="display: none; height: 100%; flex-direction: column;">
     <div class="top-bar">
-        <div class="brand"><i class="fa-solid fa-video"></i> LIVEZON <span>STUDIO</span></div>
+        <div class="brand"><i class="fa-solid fa-video" style="color: var(--accent-blue);"></i> LIVEZON <span>MASTER CONTROL</span></div>
+        <div class="center-clock" id="studioClock">00:00:00</div>
         <div class="status-indicators">
-            <span id="syncStatus" style="color: var(--text-muted);"><i class="fa-solid fa-cloud"></i></span>
+            <span id="syncStatus" style="color: var(--text-muted); font-size: 14px;"><i class="fa-solid fa-cloud"></i></span>
+            <div class="badge badge-loop"><i class="fa-solid fa-repeat"></i> AUTO-LOOP ON</div>
             <div id="airBadge" class="badge badge-live">OFFLINE</div>
-            <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
+            <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px;" title="دەرچوون"><i class="fa-solid fa-power-off"></i></button>
         </div>
     </div>
 
     <div class="workspace">
-        <!-- Monitors -->
-        <div class="monitors-row">
-            <!-- PVW -->
-            <div class="monitor-container" style="border: 2px solid var(--pvw-green);">
-                <div class="monitor-header pvw-header">PREVIEW (PVW)</div>
-                <div class="screen">
-                    <div style="color: #444; font-family: 'Orbitron'; font-size: 24px; position: absolute; z-index: 0;">NO SIGNAL</div>
-                    <iframe id="pvwScreen" style="position: relative; z-index: 1;"></iframe>
+        <div class="left-column">
+            <div class="monitors-row">
+                <div class="monitor-container" style="border: 1px solid var(--pvw-green);">
+                    <div class="monitor-header pvw-header">
+                        <span>PREVIEW (PVW)</span>
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <div class="screen">
+                        <div style="color: #333; font-family: 'Orbitron'; font-size: 16px; position: absolute;">NO PREVIEW</div>
+                        <iframe id="pvwScreen" style="position: relative; z-index: 1;"></iframe>
+                    </div>
+                </div>
+                <div class="monitor-container" style="border: 1px solid var(--pgm-red);">
+                    <div class="monitor-header pgm-header">
+                        <span>PROGRAM (PGM - LIVE)</span>
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <div class="screen">
+                        <div style="color: #333; font-family: 'Orbitron'; font-size: 16px; position: absolute;">OFF AIR</div>
+                        <iframe id="pgmScreen" style="position: relative; z-index: 1;"></iframe>
+                    </div>
                 </div>
             </div>
-            
-            <!-- PGM -->
-            <div class="monitor-container" style="border: 2px solid var(--pgm-red);">
-                <div class="monitor-header pgm-header">PROGRAM (PGM)</div>
-                <div class="screen">
-                    <div style="color: #444; font-family: 'Orbitron'; font-size: 24px; position: absolute; z-index: 0;">OFF AIR</div>
-                    <iframe id="pgmScreen" style="position: relative; z-index: 1;"></iframe>
-                </div>
+
+            <div class="transition-bar">
+                <button class="btn-trans btn-cut" onclick="masterControl('stop')"><i class="fa-solid fa-stop"></i> CUT (STOP)</button>
+                <button class="btn-trans btn-take" onclick="masterControl('play_playlist')"><i class="fa-solid fa-play"></i> TAKE (START PLAYLIST)</button>
             </div>
         </div>
 
-        <!-- Transitions -->
-        <div class="transition-bar">
-            <button class="btn-trans btn-cut" onclick="masterControl('stop')">CUT (STOP)</button>
-            <button class="btn-trans btn-take" onclick="masterControl('play_playlist')">TAKE (PLAY)</button>
-        </div>
-
-        <!-- Panels -->
-        <div class="panels-row">
-            
-            <!-- Scenes/Playlist -->
-            <div class="panel scenes-panel">
+        <div class="right-column">
+            <!-- 24/7 MASTER PLAYLIST -->
+            <div class="panel">
                 <div class="panel-title">
-                    <span><i class="fa-solid fa-layer-group"></i> SCENES / PLAYLIST</span>
-                    <select id="daySelector" onchange="switchDay(this.value)" style="width: auto; padding: 2px; font-size: 11px; background: black;">
-                        <option value="Saturday">شەممە</option>
-                        <option value="Sunday">یەکشەممە</option>
-                        <option value="Monday">دووشەممە</option>
-                    </select>
+                    <span><i class="fa-solid fa-layer-group"></i> 24/7 MASTER PLAYLIST</span>
                 </div>
-                <div class="panel-content" id="playlist">
-                    <!-- Items generated by JS -->
-                </div>
+                <div class="panel-content" id="playlist" style="max-height: 200px;"></div>
                 <div style="padding: 10px; border-top: 1px solid var(--border-color);">
-                    <button class="btn-action" onclick="addScene()"><i class="fa-solid fa-plus"></i> ADD MEDIA SOURCE</button>
+                    <button class="btn-action" style="margin-top:0;" onclick="addScene()"><i class="fa-solid fa-plus"></i> زیادکردنی ڤیدیۆ بۆ خشتە</button>
                 </div>
             </div>
 
-            <!-- Audio Mixer -->
-            <div class="panel mixer-panel">
+            <!-- AD BREAK -->
+            <div class="panel">
+                <div class="panel-title"><span style="color: var(--ad-yellow);"><i class="fa-solid fa-rectangle-ad"></i> AD BREAK (فاصل إعلاني / ڕیکلام)</span></div>
+                <div class="panel-content">
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <input type="text" id="adUrl" placeholder="لینکی ڤیدیۆی ڕیکلام..." dir="ltr" style="flex: 2; margin:0;">
+                        <input type="number" id="adDuration" value="30" placeholder="ماوە (چرکە)" style="flex: 1; margin:0;" title="ماوە بە چرکە">
+                    </div>
+                    <button class="btn-action" style="background: rgba(234, 179, 8, 0.15); border-color: var(--ad-yellow); color: var(--ad-yellow); margin-top: 5px;" onclick="playAd()">
+                        <i class="fa-solid fa-play"></i> ROLL AD (پەخشکردنی ڕیکلام)
+                    </button>
+                    <div id="adCountdown" style="display:none; text-align:center; color:var(--ad-yellow); font-weight:bold; margin-top:10px; font-family:'Orbitron'; font-size: 16px;">00:00</div>
+                </div>
+            </div>
+
+            <!-- AUDIO MIXER -->
+            <div class="panel">
                 <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> AUDIO MIXER</span></div>
-                <div class="panel-content">
+                <div class="panel-content" style="max-height: 110px;">
                     <div class="mixer-track">
-                        <div class="track-name">MASTER PGM VOL</div>
-                        <input type="range" min="0" max="100" value="100">
-                        <div style="font-size: 10px; color: var(--accent-blue); margin-top: 5px;">0.0 dB</div>
-                    </div>
-                    <div class="mixer-track" style="border-left-color: var(--text-muted);">
-                        <div class="track-name">PREVIEW VOL</div>
-                        <input type="range" min="0" max="100" value="50">
+                        <div class="track-info">
+                            <span>MASTER AUDIO (PGM)</span>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span id="volText" style="color: var(--accent-blue);">100%</span>
+                                <button class="btn-mute" onclick="toggleMute()"><i class="fa-solid fa-volume-xmark"></i></button>
+                            </div>
+                        </div>
+                        <input type="range" id="volSlider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
                     </div>
                 </div>
             </div>
 
-            <!-- Graphics & Controls -->
-            <div class="panel graphics-panel">
-                <div class="panel-title"><span><i class="fa-solid fa-object-group"></i> GRAPHICS & OVERLAYS</span></div>
+            <!-- GRAPHICS & SETTINGS -->
+            <div class="panel">
+                <div class="panel-title"><span><i class="fa-solid fa-paintbrush"></i> GRAPHICS & SETTINGS</span></div>
                 <div class="panel-content">
-                    <label>شریتی هەواڵ (TICKER TEXT)</label>
+                    <label>شریتی هەواڵ (Ticker Text)</label>
                     <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا">
                     
-                    <label>سەرچاوەی لۆگۆ (WATERMARK URL)</label>
+                    <label>لینکی لۆگۆ (Logo URL)</label>
                     <input type="text" id="logoUrl" value="https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png" dir="ltr">
                     
-                    <label>لینکی چاودێری (MONITOR URL)</label>
+                    <label>لینکی چاودێری مۆنیتەر (Monitor URL)</label>
                     <input type="text" id="monitorUrl" placeholder="لینکی ok.ru" onchange="updateMonitors()" dir="ltr">
                     
-                    <button class="btn-action" style="background: rgba(40,167,69,0.2); border-color: var(--pvw-green); color: var(--pvw-green);" onclick="saveDataToCloud('update_settings')">
-                        <i class="fa-solid fa-floppy-disk"></i> SAVE GRAPHICS & SETTINGS
+                    <button class="btn-action" style="background: rgba(16, 185, 129, 0.2); border-color: var(--pvw-green); color: var(--pvw-green);" onclick="saveDataToCloud('update_settings')">
+                        <i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان
                     </button>
                     
-                    <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 20px 0;">
+                    <hr style="border: 1px dashed var(--border-color); margin: 15px 0;">
                     
-                    <label style="color: var(--pgm-red);"><i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE (هەواڵی بەپەلە)</label>
-                    <input type="text" id="quickUrl" placeholder="لینکی ڤیدیۆی بەپەلە لێرە دابنێ..." dir="ltr">
-                    <button class="btn-action" style="background: rgba(220,53,69,0.2); border-color: var(--pgm-red); color: var(--pgm-red);" onclick="quickInject()">
+                    <label style="color: var(--pgm-red);"><i class="fa-solid fa-bolt"></i> OVERRIDE (هەواڵی بەپەلە - بێ گەڕانەوە)</label>
+                    <input type="text" id="quickUrl" placeholder="لینکی ڤیدیۆ بۆ دەستوەردانی خێرا..." dir="ltr">
+                    <button class="btn-action" style="background: rgba(239, 68, 68, 0.2); border-color: var(--pgm-red); color: var(--pgm-red);" onclick="quickInject()">
                         <i class="fa-solid fa-forward-fast"></i> INJECT NOW
                     </button>
                 </div>
             </div>
-
         </div>
+    </div>
+
+    <!-- TERMINAL LOGS -->
+    <div class="terminal-box" id="terminalLogs">
+        <div class="log-line"><span class="log-sys">[SYSTEM]</span> داشبۆردی ستۆدیۆ ئامادەیە و بە فایەربەیسەوە پەیوەست بوو.</div>
     </div>
 </div>
 
 <script>
-    // --- هەمان کۆدی فایەربەیسی پێشووە بەبێ گۆڕانکاری بۆ ئەوەی ڕاستەوخۆ کار بکات ---
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyA_CyVB1f9UCHG_FMmYDSqG3oLGkohfE80",
         authDomain: "media-bagera-63d90.firebaseapp.com",
@@ -234,19 +252,21 @@
     const auth = firebase.auth();
     const db = firebase.database(); 
     
-    let isLive = false;
     let isInitialLoad = true;
-    let currentEditingDay = "Saturday";
-    let weeklySchedule = { "Saturday": [], "Sunday": [], "Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [] };
-    const daysArr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let masterPlaylist = [];
+
+    // کاتژمێری ستۆدیۆ
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('studioClock').innerText = now.toLocaleTimeString('en-GB');
+    }, 1000);
 
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
-            currentEditingDay = daysArr[new Date().getDay()];
-            document.getElementById('daySelector').value = currentEditingDay;
             loadDataFromCloud();
+            addLog("چوونەژوورەوەی ئەدمین سەرکەوتوو بوو.", "ok");
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('appContainer').style.display = 'none';
@@ -256,13 +276,23 @@
     function login() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPass').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(() => alert('زانیارییەکان هەڵەن'));
+        auth.signInWithEmailAndPassword(email, pass).catch(() => alert('زانیارییەکان هەڵەن!'));
     }
 
     function logout() { auth.signOut(); }
 
+    function addLog(msg, type = 'sys') {
+        const term = document.getElementById('terminalLogs');
+        const time = new Date().toLocaleTimeString('en-GB');
+        let cls = 'log-sys';
+        if(type === 'ok') cls = 'log-ok';
+        if(type === 'err') cls = 'log-err';
+        if(type === 'warn') cls = 'log-warn';
+        term.insertAdjacentHTML('beforeend', `<div class="log-line"><span class="${cls}">[${time}]</span> ${msg}</div>`);
+        term.scrollTop = term.scrollHeight;
+    }
+
     function loadDataFromCloud() {
-        document.getElementById('syncStatus').style.color = 'var(--accent-blue)';
         db.ref("system/mcr_data").on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
@@ -276,30 +306,24 @@
                 }
 
                 if (isInitialLoad) {
-                    document.getElementById('tickerText').value = parsedData.t || 'بەخێربێن بۆ کەناڵی میدیا باگێرا'; 
-                    document.getElementById('logoUrl').value = parsedData.l || 'https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png';
+                    document.getElementById('tickerText').value = parsedData.t || ''; 
+                    document.getElementById('logoUrl').value = parsedData.l || '';
                     document.getElementById('monitorUrl').value = parsedData.m || '';
-                    if (parsedData.schedule) weeklySchedule = Object.assign(weeklySchedule, parsedData.schedule);
                     
-                    renderPlaylistForDay(currentEditingDay);
+                    if (parsedData.play) masterPlaylist = parsedData.play;
+                    
+                    renderPlaylist();
                     updateMonitors();
                     isInitialLoad = false;
+                    addLog("داتاکانی خشتە لە سێرڤەرەوە بارکران.", "ok");
                 }
             }
-            setTimeout(() => document.getElementById('syncStatus').style.color = 'var(--text-muted)', 500);
         });
     }
 
-    function switchDay(selectedDay) {
-        weeklySchedule[currentEditingDay] = getListData();
-        currentEditingDay = selectedDay;
-        renderPlaylistForDay(currentEditingDay);
-    }
-
-    function renderPlaylistForDay(day) {
+    function renderPlaylist() {
         document.getElementById('playlist').innerHTML = '';
-        const items = weeklySchedule[day] || [];
-        items.forEach(x => createSceneHTML(x));
+        masterPlaylist.forEach(x => createSceneHTML(x));
     }
 
     function getListData() {
@@ -322,53 +346,139 @@
         const id = Date.now() + Math.floor(Math.random()*100);
         const html = `
         <div class="scene-item" id="${id}">
-            <i class="fa-solid fa-grip-vertical drag-handle" style="color: #555; cursor: grab; margin-left: 10px;"></i>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 5px;">
-                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی سەرچاوە (Source)" style="background: transparent; border: none; font-weight: bold; padding: 0;">
-                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ..." dir="ltr" style="font-size: 11px; padding: 4px;">
-                <input type="hidden" class="i-dur" value="${data.duration || 3600}">
+            <div class="scene-top">
+                <i class="fa-solid fa-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
+                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی ڤیدیۆ...">
+                <div class="scene-controls">
+                    <button class="btn-pvw" onclick="sendToPreview(this)" title="ناردن بۆ پێشبینین">PVW</button>
+                    <button class="btn-del" onclick="this.closest('.scene-item').remove();"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </div>
-            <div class="scene-controls">
-                <button onclick="this.closest('.scene-item').remove()"><i class="fa-solid fa-trash"></i></button>
+            <div class="scene-bottom">
+                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ (m3u8/mp4)..." dir="ltr" style="flex: 2;">
+                <input type="number" class="i-dur" value="${data.duration || 3600}" placeholder="ماوە (چرکە)" style="flex: 1;" title="ماوە بە چرکە">
             </div>
         </div>`;
         document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.drag-handle' });
+        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.fa-grip-vertical' });
     });
+
+    function sendToPreview(btnElement) {
+        const item = btnElement.closest('.scene-item');
+        const url = item.querySelector('.i-url').value;
+        if(url && url.includes('ok.ru')) {
+            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
+            document.getElementById('pvwScreen').src = fUrl;
+            addLog(`سەرچاوە نێردرا بۆ شاشەی PVW.`, "sys");
+            
+            document.querySelectorAll('.scene-item').forEach(el => el.style.borderLeftColor = 'transparent');
+            item.style.borderLeftColor = 'var(--pvw-green)';
+        } else {
+            alert('ببوورە، لە ئێستادا تەنها لینکی ok.ru دەتوانیت پێشبینین بکەیت.');
+        }
+    }
 
     function updateMonitors() {
         const url = document.getElementById('monitorUrl').value.trim();
         if(url.includes('ok.ru')) {
             let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
             document.getElementById('pgmScreen').src = fUrl;
-            document.getElementById('pvwScreen').src = fUrl; // For now, PVW mirrors PGM until WebRTC backend is built
         }
+    }
+
+    let isMuted = false;
+    let lastVol = 100;
+    function toggleMute() {
+        const slider = document.getElementById('volSlider');
+        if(!isMuted) {
+            lastVol = slider.value;
+            slider.value = 0;
+            updateVolume(0);
+            isMuted = true;
+            addLog("دەنگی پەخش بێدەنگ کرا (Muted).", "err");
+        } else {
+            slider.value = lastVol;
+            updateVolume(lastVol);
+            isMuted = false;
+            addLog("دەنگی پەخش گەڕایەوە.", "ok");
+        }
+    }
+
+    function updateVolume(val) {
+        document.getElementById('volText').innerText = val + "%";
+        if(val > 0) isMuted = false;
     }
 
     function saveDataToCloud(commandOverride = null) {
         if (isInitialLoad) return;
-        weeklySchedule[currentEditingDay] = getListData();
+        masterPlaylist = getListData();
         
         const data = {
             t: document.getElementById('tickerText').value, 
             l: document.getElementById('logoUrl').value,
             m: document.getElementById('monitorUrl').value,
-            schedule: weeklySchedule 
+            play: masterPlaylist 
         };
         
         const cmd = commandOverride || 'play_playlist';
-        db.ref("system/mcr_data").set({ payload: JSON.stringify(data), command: cmd, timestamp: Date.now() });
+        db.ref("system/mcr_data").set({ payload: JSON.stringify(data), command: cmd, timestamp: Date.now() })
+        .then(() => {
+            if(cmd !== 'override') addLog(`فەرمانی [${cmd.toUpperCase()}] نێردرا بۆ سێرڤەر.`, "ok");
+        });
+    }
+
+    let adInterval = null;
+    function playAd() {
+        const adUrl = document.getElementById('adUrl').value.trim();
+        const adDur = parseInt(document.getElementById('adDuration').value) || 30;
+
+        if(!adUrl) return alert("تکایە لینکی ڤیدیۆی ڕیکلام دابنێ!");
+
+        db.ref("system/mcr_data").set({
+            payload: JSON.stringify({
+                play: [{ url: adUrl, title: "ڕیکلام (Ad Break)", duration: adDur }],
+                n: "Media Bagera TV",
+                l: document.getElementById('logoUrl').value
+            }),
+            command: 'override',
+            timestamp: Date.now()
+        });
+
+        addLog(`فاسڵێکی ڕیکلام بۆ ماوەی ${adDur} چرکە پەخش دەکرێت.`, "warn");
+
+        const countElem = document.getElementById('adCountdown');
+        countElem.style.display = 'block';
+        let timeLeft = adDur;
+        countElem.innerText = `گەڕانەوە بۆ خشتە لە: ${timeLeft}s`;
+
+        clearInterval(adInterval);
+        adInterval = setInterval(() => {
+            timeLeft--;
+            if(timeLeft <= 0) {
+                clearInterval(adInterval);
+                countElem.style.display = 'none';
+                masterControl('play_playlist');
+                addLog("ڕیکلام کۆتایی هات، گەڕانەوە بۆ خشتەی سەرەکی.", "ok");
+            } else {
+                countElem.innerText = `گەڕانەوە بۆ خشتە لە: ${timeLeft}s`;
+            }
+        }, 1000);
     }
 
     function masterControl(cmd) {
+        clearInterval(adInterval); 
+        document.getElementById('adCountdown').style.display = 'none';
+        
         saveDataToCloud(cmd);
+        if(cmd === 'play_playlist') {
+            document.getElementById('pgmScreen').src = document.getElementById('pvwScreen').src;
+        }
     }
 
     function setLiveStatus(status) {
-        isLive = status;
         const badge = document.getElementById("airBadge");
         if (status) {
             badge.innerText = 'LIVE (ON AIR)'; badge.className = 'badge badge-live active';
@@ -378,8 +488,11 @@
     }
 
     function quickInject() {
+        clearInterval(adInterval); 
+        document.getElementById('adCountdown').style.display = 'none';
+        
         const url = document.getElementById('quickUrl').value.trim();
-        if(!url) return alert("سەرەتا لینک دابنێ!");
+        if(!url) return alert("تکایە لینکێک دابنێ!");
         
         db.ref("system/mcr_data").set({
             payload: JSON.stringify({
@@ -391,6 +504,7 @@
             timestamp: Date.now()
         });
         document.getElementById('quickUrl').value = '';
+        addLog("لینکێکی بەپەلە (Override) ڕاستەوخۆ نێردرایە سەر شاشە.", "err");
     }
 </script>
 </body>
