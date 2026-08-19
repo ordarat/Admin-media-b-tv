@@ -15,13 +15,16 @@
         .container { width: 100%; max-width: 600px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h2 { margin-top: 0; color: #2563eb; font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; display: flex; align-items: center; gap: 10px;}
         label { font-size: 13px; font-weight: bold; margin-top: 15px; display: block; color: #4b5563; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-family: inherit; direction: ltr; text-align: left;}
-        input:focus { outline: none; border-color: #2563eb; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-family: inherit; direction: ltr; text-align: left; resize: vertical;}
+        input:focus, textarea:focus { outline: none; border-color: #2563eb; }
         .btn { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; color: white; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-blue { background-color: #2563eb; } .btn-blue:hover { background-color: #1d4ed8; }
         .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
         .btn-red { background-color: #ef4444; } .btn-red:hover { background-color: #dc2626; }
         
+        .action-row { display: flex; gap: 10px; margin-top: 15px; }
+        .action-row .btn { margin-top: 0; flex: 1; }
+
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f3f4f6; display: flex; justify-content: center; align-items: center; z-index: 100; }
         .status-bar { width: 100%; max-width: 600px; padding: 15px; background: #1e293b; color: white; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; box-sizing: border-box;}
     </style>
@@ -51,12 +54,19 @@
 
     <!-- بەشی وێنە و دەنگ -->
     <div class="container">
-        <h2 style="color: #10b981;"><i class="fa-solid fa-image"></i> ٢. پەخشی وێنە و مۆسیقا</h2>
-        <label>لینکی وێنە (JPG, PNG...)</label>
-        <input type="text" id="imageUrl" placeholder="https://...">
+        <h2 style="color: #10b981;"><i class="fa-solid fa-images"></i> ٢. پەخشی وێنە (Slideshow) و مۆسیقا</h2>
+        
+        <label>لینکی وێنەکان (هەر لینکێک لە دێڕێکی نوێدا دابنێ)</label>
+        <textarea id="imageUrl" rows="5" placeholder="https://image1.jpg&#10;https://image2.jpg&#10;https://image3.png"></textarea>
+        
         <label>لینکی مۆسیقا یان دەنگ (MP3, MP4, AAC...)</label>
         <input type="text" id="audioUrl" placeholder="https://...">
-        <button class="btn btn-red" onclick="sendImageCommand()"><i class="fa-solid fa-stop"></i> ڤیدیۆ ڕاگرە و وێنەکە پەخش بکە</button>
+        
+        <!-- دوگمەکان -->
+        <div class="action-row">
+            <button class="btn btn-red" onclick="sendImageCommand()"><i class="fa-solid fa-images"></i> پەخشی وێنەکان</button>
+            <button class="btn btn-blue" onclick="sendVideoCommand()"><i class="fa-solid fa-rotate-left"></i> گەڕانەوە بۆ ڤیدیۆ</button>
+        </div>
     </div>
 
     <!-- بەشی هەواڵ و ڕێکخستن -->
@@ -120,7 +130,7 @@
 
     function sendVideoCommand() {
         const vUrl = document.getElementById('videoUrl').value.trim();
-        if(!vUrl) return alert("تکایە لینکی ڤیدیۆ دابنێ!");
+        if(!vUrl) return alert("تکایە سەرەتا لینکی ڤیدیۆ لە بەشی سەرەوە دابنێ!");
         
         const payload = JSON.stringify({
             video: vUrl,
@@ -136,7 +146,7 @@
     function sendImageCommand() {
         const iUrl = document.getElementById('imageUrl').value.trim();
         const aUrl = document.getElementById('audioUrl').value.trim();
-        if(!iUrl) return alert("تکایە لینکی وێنە دابنێ!");
+        if(!iUrl) return alert("تکایە بەلایەنی کەمەوە یەک لینکی وێنە دابنێ!");
         
         const payload = JSON.stringify({
             image: iUrl,
@@ -146,7 +156,7 @@
         });
         
         db.ref("system/mcr_data").set({ payload: payload, command: 'play_image', timestamp: Date.now() });
-        document.getElementById('statusText').innerText = "⏸️ ڤیدیۆ ڕاگیرا - وێنە پەخش دەکرێت";
+        document.getElementById('statusText').innerText = "⏸️ ڤیدیۆ ڕاگیرا - وێنەکان پەخش دەکرێن";
         document.getElementById('statusText').style.backgroundColor = "#ef4444";
     }
 
