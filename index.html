@@ -3,232 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveZon Studio - 24/7 Master Control</title>
+    <title>LiveZon - Simple Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; color: #1f2937; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 600px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; color: #2563eb; font-size: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+        label { font-size: 13px; font-weight: bold; margin-top: 15px; display: block; color: #4b5563; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-family: inherit; direction: ltr; text-align: left;}
+        input:focus { outline: none; border-color: #2563eb; }
+        .btn { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; color: white; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-blue { background-color: #2563eb; } .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-green { background-color: #10b981; } .btn-green:hover { background-color: #059669; }
+        .btn-red { background-color: #ef4444; } .btn-red:hover { background-color: #dc2626; }
         
-        :root {
-            --bg-dark: #05070c; --bg-panel: #0f172a; --bg-input: #1e293b;
-            --border-color: #334155; --accent-blue: #0ea5e9; --accent-hover: #0284c7;
-            --pvw-green: #10b981; --pgm-red: #ef4444; --ad-yellow: #eab308; --text-main: #f8fafc; --text-muted: #94a3b8;
-        }
-
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .login-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 40px; border-radius: 12px; width: 380px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7); }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-input); border: 1px solid var(--border-color); color: white; border-radius: 6px; box-sizing: border-box; text-align: left; direction: ltr; font-size: 14px; }
-        .btn-login { width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
-        .btn-login:hover { background: var(--accent-hover); }
-
-        .top-bar { background: var(--bg-panel); border-bottom: 1px solid var(--border-color); padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 55px; box-sizing: border-box; }
-        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
-        .brand span { color: var(--accent-blue); }
-        .center-clock { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: bold; color: var(--accent-blue); letter-spacing: 2px; background: #000; padding: 4px 15px; border-radius: 4px; border: 1px solid var(--border-color); }
-        .status-indicators { display: flex; gap: 15px; align-items: center; }
-        .badge { padding: 5px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;}
-        .badge-live { background: transparent; border: 1px solid var(--pgm-red); color: var(--pgm-red); }
-        .badge-live.active { background: var(--pgm-red); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); animation: pulse 1.5s infinite; }
-        .badge-loop { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--pvw-green); color: var(--pvw-green); }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .workspace { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr auto; gap: 10px; flex: 1; padding: 10px; overflow: hidden; box-sizing: border-box; }
-        @media(max-width: 1200px) { .workspace { grid-template-columns: 1fr; overflow-y: auto; } }
-
-        .left-column { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .monitors-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 58vh; min-height: 280px; }
-        .monitor-container { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-        .monitor-header { padding: 8px 15px; font-weight: bold; font-family: 'Orbitron'; font-size: 12px; text-align: center; border-bottom: 1px solid var(--border-color); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;}
-        .pvw-header { background: rgba(16, 185, 129, 0.15); color: var(--pvw-green); }
-        .pgm-header { background: rgba(239, 68, 68, 0.15); color: var(--pgm-red); }
-        .screen { flex: 1; background: #000; display: flex; justify-content: center; align-items: center; position: relative; }
-        .screen iframe { width: 100%; height: 100%; border: none; }
-
-        .transition-bar { display: flex; justify-content: center; gap: 15px; background: var(--bg-panel); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .btn-trans { padding: 10px 35px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; font-size: 14px; transition: 0.2s; }
-        .btn-cut { background: var(--bg-input); color: white; border: 1px solid var(--border-color); }
-        .btn-cut:hover { background: #334155; }
-        .btn-take { background: var(--pgm-red); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
-        .btn-take:hover { background: #dc2626; }
-
-        .right-column { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px;}
-        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; flex-shrink: 0;}
-        .panel-title { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-weight: bold; font-family: 'Orbitron'; font-size: 12px; color: var(--accent-blue); display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
-        .panel-content { padding: 12px; overflow-y: auto; }
-
-        label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; margin-top: 10px; font-weight: bold; text-transform: uppercase; }
-        input[type="text"], input[type="number"], select { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
-        input:focus, select:focus { outline: none; border-color: var(--accent-blue); }
-        
-        .btn-action { background: var(--bg-input); color: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-weight: bold; font-size: 13px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-action:hover { background: var(--accent-blue); border-color: var(--accent-blue); }
-
-        .mixer-track { background: var(--bg-input); padding: 12px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid var(--accent-blue); }
-        .track-info { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-        .btn-mute { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--pgm-red); color: var(--pgm-red); border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 11px; }
-        .btn-mute:hover { background: var(--pgm-red); color: white; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; background: white; cursor: pointer; border-radius: 50%; box-shadow: 0 0 5px #000; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #0f172a; border-radius: 3px; border: 1px solid #333; }
-
-        .scene-item { background: var(--bg-input); border: 1px solid var(--border-color); padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px; position: relative; border-left: 3px solid transparent; transition: 0.2s; }
-        .scene-item:hover { border-left-color: var(--text-muted); }
-        .scene-top { display: flex; align-items: center; gap: 8px; }
-        .scene-top input { background: transparent; border: none; font-weight: bold; font-size: 13px; padding: 2px; flex: 1; color: white;}
-        .scene-top input:focus { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
-        .scene-bottom { display: flex; gap: 8px; align-items: center; }
-        .scene-bottom input { font-size: 11px; padding: 8px; }
-        .scene-controls { display: flex; gap: 5px; }
-        .btn-pvw { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--pvw-green); color: var(--pvw-green); border-radius: 4px; font-size: 10px; font-weight: bold; padding: 2px 6px; cursor: pointer; }
-        .btn-pvw:hover { background: var(--pvw-green); color: black; }
-        .btn-del { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 14px; transition: 0.2s; }
-        .btn-del:hover { color: var(--pgm-red); }
-
-        .terminal-box { background: #030712; border-top: 1px solid var(--border-color); padding: 10px 20px; font-family: 'Courier New', monospace; font-size: 12px; height: 95px; overflow-y: auto; box-sizing: border-box; flex-shrink: 0; }
-        .log-line { margin-bottom: 4px; color: var(--text-muted); }
-        .log-sys { color: var(--accent-blue); }
-        .log-ok { color: var(--pvw-green); }
-        .log-err { color: var(--pgm-red); }
-        .log-warn { color: var(--ad-yellow); }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f3f4f6; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .status-bar { width: 100%; max-width: 600px; padding: 15px; background: #1e293b; color: white; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; box-sizing: border-box;}
     </style>
 </head>
 <body>
 
 <div id="loginScreen">
-    <div class="login-box">
-        <h2 style="font-family:'Orbitron'; margin-bottom: 25px; color: white;">LiveZon <span>STUDIO</span></h2>
-        <input type="email" id="loginEmail" placeholder="ئیمەیڵی ئەدمین">
+    <div class="container" style="text-align: center;">
+        <h2 style="justify-content: center; border: none;"><i class="fa-solid fa-lock"></i> چوونەژوورەوە</h2>
+        <input type="email" id="loginEmail" placeholder="ئیمەیڵ">
         <input type="password" id="loginPass" placeholder="تێپەڕوشە">
-        <button class="btn-login" onclick="login()">چوونەژوورەوە <i class="fa-solid fa-right-to-bracket"></i></button>
+        <button class="btn btn-blue" onclick="login()">چوونەژوورەوە</button>
     </div>
 </div>
 
-<div id="appContainer" style="display: none; height: 100%; flex-direction: column;">
-    <div class="top-bar">
-        <div class="brand"><i class="fa-solid fa-video" style="color: var(--accent-blue);"></i> LIVEZON <span>MASTER CONTROL</span></div>
-        <div class="center-clock" id="studioClock">00:00:00</div>
-        <div class="status-indicators">
-            <span id="syncStatus" style="color: var(--text-muted); font-size: 14px;"><i class="fa-solid fa-cloud"></i></span>
-            <div class="badge badge-loop"><i class="fa-solid fa-repeat"></i> AUTO-LOOP ON</div>
-            <div id="airBadge" class="badge badge-live">OFFLINE</div>
-            <button onclick="logout()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px;" title="دەرچوون"><i class="fa-solid fa-power-off"></i></button>
-        </div>
+<div id="appContainer" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    
+    <div class="status-bar" id="statusText">چاوەڕێی پەیوەندی...</div>
+
+    <!-- بەشی ڤیدیۆ -->
+    <div class="container">
+        <h2><i class="fa-solid fa-video"></i> ١. پەخشی ڤیدیۆ</h2>
+        <label>لینکی ڤیدیۆ یان پەخشی ڕاستەوخۆ (m3u8, mp4...)</label>
+        <input type="text" id="videoUrl" placeholder="https://...">
+        <button class="btn btn-blue" onclick="sendVideoCommand()"><i class="fa-solid fa-play"></i> دەستپێکردنی ڤیدیۆ</button>
     </div>
 
-    <div class="workspace">
-        <div class="left-column">
-            <div class="monitors-row">
-                <div class="monitor-container" style="border: 1px solid var(--pvw-green);">
-                    <div class="monitor-header pvw-header">
-                        <span>PREVIEW (PVW)</span>
-                        <i class="fa-solid fa-eye"></i>
-                    </div>
-                    <div class="screen">
-                        <div style="color: #333; font-family: 'Orbitron'; font-size: 16px; position: absolute;">NO PREVIEW</div>
-                        <iframe id="pvwScreen" style="position: relative; z-index: 1;"></iframe>
-                    </div>
-                </div>
-                <div class="monitor-container" style="border: 1px solid var(--pgm-red);">
-                    <div class="monitor-header pgm-header">
-                        <span>PROGRAM (PGM - LIVE)</span>
-                        <i class="fa-solid fa-satellite-dish"></i>
-                    </div>
-                    <div class="screen">
-                        <div style="color: #333; font-family: 'Orbitron'; font-size: 16px; position: absolute;">OFF AIR</div>
-                        <iframe id="pgmScreen" style="position: relative; z-index: 1;"></iframe>
-                    </div>
-                </div>
-            </div>
-
-            <div class="transition-bar">
-                <button class="btn-trans btn-cut" onclick="masterControl('stop')"><i class="fa-solid fa-stop"></i> CUT (STOP)</button>
-                <button class="btn-trans btn-take" onclick="masterControl('play_playlist')"><i class="fa-solid fa-play"></i> TAKE (START PLAYLIST)</button>
-            </div>
-        </div>
-
-        <div class="right-column">
-            <!-- 24/7 MASTER PLAYLIST -->
-            <div class="panel">
-                <div class="panel-title">
-                    <span><i class="fa-solid fa-layer-group"></i> 24/7 MASTER PLAYLIST</span>
-                </div>
-                <div class="panel-content" id="playlist" style="max-height: 200px;"></div>
-                <div style="padding: 10px; border-top: 1px solid var(--border-color);">
-                    <button class="btn-action" style="margin-top:0;" onclick="addScene()"><i class="fa-solid fa-plus"></i> زیادکردنی لایڤ بۆ خشتە</button>
-                </div>
-            </div>
-
-            <!-- AD BREAK -->
-            <div class="panel">
-                <div class="panel-title"><span style="color: var(--ad-yellow);"><i class="fa-solid fa-rectangle-ad"></i> AD BREAK (فاصل إعلاني / ڕیکلام)</span></div>
-                <div class="panel-content">
-                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                        <input type="text" id="adUrl" placeholder="لینکی ڤیدیۆی ڕیکلام..." dir="ltr" style="flex: 2; margin:0;">
-                        <input type="number" id="adDuration" value="30" placeholder="ماوە (چرکە)" style="flex: 1; margin:0;" title="ماوەی ڕیکلام بە چرکە">
-                    </div>
-                    <button class="btn-action" style="background: rgba(234, 179, 8, 0.15); border-color: var(--ad-yellow); color: var(--ad-yellow); margin-top: 5px;" onclick="playAd()">
-                        <i class="fa-solid fa-play"></i> ROLL AD (پەخشکردنی ڕیکلام)
-                    </button>
-                    <div id="adCountdown" style="display:none; text-align:center; color:var(--ad-yellow); font-weight:bold; margin-top:10px; font-family:'Orbitron'; font-size: 16px;">00:00</div>
-                </div>
-            </div>
-
-            <!-- AUDIO MIXER -->
-            <div class="panel">
-                <div class="panel-title"><span><i class="fa-solid fa-sliders"></i> AUDIO MIXER</span></div>
-                <div class="panel-content" style="max-height: 110px;">
-                    <div class="mixer-track">
-                        <div class="track-info">
-                            <span>MASTER AUDIO (PGM)</span>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <span id="volText" style="color: var(--accent-blue);">100%</span>
-                                <button class="btn-mute" onclick="toggleMute()"><i class="fa-solid fa-volume-xmark"></i></button>
-                            </div>
-                        </div>
-                        <input type="range" id="volSlider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
-                    </div>
-                </div>
-            </div>
-
-            <!-- GRAPHICS & SETTINGS -->
-            <div class="panel">
-                <div class="panel-title"><span><i class="fa-solid fa-paintbrush"></i> GRAPHICS & SETTINGS</span></div>
-                <div class="panel-content">
-                    <label>شریتی هەواڵ (Ticker Text)</label>
-                    <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا">
-                    
-                    <label>لینکی لۆگۆ (Logo URL)</label>
-                    <input type="text" id="logoUrl" value="https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png" dir="ltr">
-                    
-                    <label>لینکی چاودێری مۆنیتەر (Monitor URL)</label>
-                    <input type="text" id="monitorUrl" placeholder="لینکی ok.ru" onchange="updateMonitors()" dir="ltr">
-                    
-                    <button class="btn-action" style="background: rgba(16, 185, 129, 0.2); border-color: var(--pvw-green); color: var(--pvw-green);" onclick="saveDataToCloud('update_settings')">
-                        <i class="fa-solid fa-floppy-disk"></i> پاشەکەوتکردنی ڕێکخستنەکان
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- بەشی وێنە و دەنگ -->
+    <div class="container">
+        <h2 style="color: #10b981;"><i class="fa-solid fa-image"></i> ٢. پەخشی وێنە و مۆسیقا</h2>
+        <label>لینکی وێنە (JPG, PNG...)</label>
+        <input type="text" id="imageUrl" placeholder="https://...">
+        <label>لینکی مۆسیقا یان دەنگ (MP3, MP4, AAC...)</label>
+        <input type="text" id="audioUrl" placeholder="https://...">
+        <button class="btn btn-red" onclick="sendImageCommand()"><i class="fa-solid fa-stop"></i> ڤیدیۆ ڕاگرە و وێنەکە پەخش بکە</button>
     </div>
 
-    <!-- TERMINAL LOGS -->
-    <div class="terminal-box" id="terminalLogs">
-        <div class="log-line"><span class="log-sys">[SYSTEM]</span> داشبۆردی ستۆدیۆ ئامادەیە و بە فایەربەیسەوە پەیوەست بوو.</div>
+    <!-- بەشی هەواڵ و ڕێکخستن -->
+    <div class="container">
+        <h2 style="color: #6b7280;"><i class="fa-solid fa-newspaper"></i> ٣. شریتی هەواڵ و لۆگۆ</h2>
+        <label>شریتی هەواڵ (Ticker Text)</label>
+        <input type="text" id="tickerText" value="بەخێربێن بۆ کەناڵی میدیا باگێرا" dir="rtl" style="text-align: right;">
+        <label>لینکی لۆگۆ</label>
+        <input type="text" id="logoUrl" value="https://i.postimg.cc/Kv60DSRk/1000035211-removebg-preview.png">
+        <button class="btn btn-green" onclick="updateSettings()"><i class="fa-solid fa-floppy-disk"></i> سەیڤکردن</button>
     </div>
 </div>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyA_CyVB1f9UCHG_FMmYDSqG3oLGkohfE80",
         authDomain: "media-bagera-63d90.firebaseapp.com",
@@ -236,28 +78,19 @@
         projectId: "media-bagera-63d90",
         storageBucket: "media-bagera-63d90.firebasestorage.app",
         messagingSenderId: "457510380933",
-        appId: "1:457510380933:web:c181b17a72d5e4a33dd0ec",
-        measurementId: "G-1CVRHFBREB"
+        appId: "1:457510380933:web:c181b17a72d5e4a33dd0ec"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database(); 
-    
-    let isInitialLoad = true;
-    let masterPlaylist = [];
-
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('studioClock').innerText = now.toLocaleTimeString('en-GB');
-    }, 1000);
 
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
-            loadDataFromCloud();
-            addLog("چوونەژوورەوەی ئەدمین سەرکەوتوو بوو.", "ok");
+            document.getElementById('statusText').innerText = "✅ پەیوەندی سەرکەوتوو بوو";
+            loadSettings();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('appContainer').style.display = 'none';
@@ -267,237 +100,66 @@
     function login() {
         const email = document.getElementById('loginEmail').value;
         const pass = document.getElementById('loginPass').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(() => alert('زانیارییەکان هەڵەن!'));
+        auth.signInWithEmailAndPassword(email, pass).catch(() => alert('هەڵە لە ئیمەیڵ یان وشەی نهێنی!'));
     }
 
-    function logout() { auth.signOut(); }
-
-    function addLog(msg, type = 'sys') {
-        const term = document.getElementById('terminalLogs');
-        const time = new Date().toLocaleTimeString('en-GB');
-        let cls = 'log-sys';
-        if(type === 'ok') cls = 'log-ok';
-        if(type === 'err') cls = 'log-err';
-        if(type === 'warn') cls = 'log-warn';
-        term.insertAdjacentHTML('beforeend', `<div class="log-line"><span class="${cls}">[${time}]</span> ${msg}</div>`);
-        term.scrollTop = term.scrollHeight;
-    }
-
-    function loadDataFromCloud() {
-        db.ref("system/mcr_data").on("value", (snapshot) => {
-            if (snapshot.exists()) {
-                const d = snapshot.val();
-                let parsedData = {};
-                try { parsedData = JSON.parse(d.payload || "{}"); } catch(e) {}
-                
-                if(d.command === 'play_playlist' || d.command === 'override') {
-                    setLiveStatus(true);
-                } else if (d.command === 'stop') {
-                    setLiveStatus(false);
-                }
-
-                if (isInitialLoad) {
-                    document.getElementById('tickerText').value = parsedData.t || ''; 
-                    document.getElementById('logoUrl').value = parsedData.l || '';
-                    document.getElementById('monitorUrl').value = parsedData.m || '';
-                    
-                    if (parsedData.play) masterPlaylist = parsedData.play;
-                    
-                    renderPlaylist();
-                    updateMonitors();
-                    isInitialLoad = false;
-                    addLog("داتاکانی خشتە لە سێرڤەرەوە بارکران.", "ok");
-                }
+    function loadSettings() {
+        db.ref("system/mcr_data/payload").once("value", (snapshot) => {
+            if(snapshot.exists()) {
+                try {
+                    const data = JSON.parse(snapshot.val());
+                    if(data.ticker) document.getElementById('tickerText').value = data.ticker;
+                    if(data.logo) document.getElementById('logoUrl').value = data.logo;
+                    if(data.video) document.getElementById('videoUrl').value = data.video;
+                    if(data.image) document.getElementById('imageUrl').value = data.image;
+                    if(data.audio) document.getElementById('audioUrl').value = data.audio;
+                } catch(e) {}
             }
         });
     }
 
-    function renderPlaylist() {
-        document.getElementById('playlist').innerHTML = '';
-        masterPlaylist.forEach(x => createSceneHTML(x));
-    }
-
-    function getListData() {
-        const arr = [];
-        document.querySelectorAll(`.scene-item`).forEach(el => {
-            arr.push({ 
-                url: el.querySelector('.i-url').value, 
-                title: el.querySelector('.i-title').value, 
-                duration: el.querySelector('.i-dur').value 
-            });
+    function sendVideoCommand() {
+        const vUrl = document.getElementById('videoUrl').value.trim();
+        if(!vUrl) return alert("تکایە لینکی ڤیدیۆ دابنێ!");
+        
+        const payload = JSON.stringify({
+            video: vUrl,
+            ticker: document.getElementById('tickerText').value,
+            logo: document.getElementById('logoUrl').value
         });
-        return arr;
-    }
-
-    function addScene() {
-        createSceneHTML({ title: "پەخشی سەرەکی", duration: 24, url: "" });
-    }
-
-    function createSceneHTML(data) {
-        const id = Date.now() + Math.floor(Math.random()*100);
-        const html = `
-        <div class="scene-item" id="${id}">
-            <div class="scene-top">
-                <i class="fa-solid fa-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
-                <input type="text" class="i-title" value="${data.title || ''}" placeholder="ناوی پەخش...">
-                <div class="scene-controls">
-                    <button class="btn-pvw" onclick="sendToPreview(this)" title="ناردن بۆ پێشبینین">PVW</button>
-                    <button class="btn-del" onclick="this.closest('.scene-item').remove();"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
-            <div class="scene-bottom">
-                <input type="text" class="i-url" value="${data.url || ''}" placeholder="لینکی ڤیدیۆ یان m3u..." dir="ltr" style="flex: 2;">
-                <!-- گۆڕانکاری بۆ کاتژمێر لێرە کراوە -->
-                <input type="number" class="i-dur" value="${data.duration || 24}" placeholder="ماوە (کاتژمێر)" style="flex: 1;" title="ماوە بە کاتژمێر">
-            </div>
-        </div>`;
-        document.getElementById('playlist').insertAdjacentHTML('beforeend', html);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        new Sortable(document.getElementById('playlist'), { animation: 150, handle: '.fa-grip-vertical' });
-    });
-
-    function sendToPreview(btnElement) {
-        const item = btnElement.closest('.scene-item');
-        const url = item.querySelector('.i-url').value;
-        if(url && url.includes('ok.ru')) {
-            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
-            document.getElementById('pvwScreen').src = fUrl;
-            addLog(`سەرچاوە نێردرا بۆ شاشەی PVW.`, "sys");
-            
-            document.querySelectorAll('.scene-item').forEach(el => el.style.borderLeftColor = 'transparent');
-            item.style.borderLeftColor = 'var(--pvw-green)';
-        } else {
-            alert('ببوورە، لە ئێستادا تەنها لینکی ok.ru دەتوانیت پێشبینین بکەیت لەناو وێبگەڕەکە.');
-        }
-    }
-
-    function updateMonitors() {
-        const url = document.getElementById('monitorUrl').value.trim();
-        if(url.includes('ok.ru')) {
-            let fUrl = url.includes('/videoembed/') ? url : url.replace('/video/', '/videoembed/');
-            document.getElementById('pgmScreen').src = fUrl;
-        }
-    }
-
-    let isMuted = false;
-    let lastVol = 100;
-    function toggleMute() {
-        const slider = document.getElementById('volSlider');
-        if(!isMuted) {
-            lastVol = slider.value;
-            slider.value = 0;
-            updateVolume(0);
-            isMuted = true;
-            addLog("دەنگی پەخش بێدەنگ کرا (Muted).", "err");
-        } else {
-            slider.value = lastVol;
-            updateVolume(lastVol);
-            isMuted = false;
-            addLog("دەنگی پەخش گەڕایەوە.", "ok");
-        }
-    }
-
-    function updateVolume(val) {
-        document.getElementById('volText').innerText = val + "%";
-        if(val > 0) isMuted = false;
-    }
-
-    function saveDataToCloud(commandOverride = null) {
-        if (isInitialLoad) return;
-        masterPlaylist = getListData();
         
-        const data = {
-            t: document.getElementById('tickerText').value, 
-            l: document.getElementById('logoUrl').value,
-            m: document.getElementById('monitorUrl').value,
-            play: masterPlaylist 
-        };
+        db.ref("system/mcr_data").set({ payload: payload, command: 'play_video', timestamp: Date.now() });
+        document.getElementById('statusText').innerText = "▶️ فەرمانی پەخشی ڤیدیۆ نێردرا";
+        document.getElementById('statusText').style.backgroundColor = "#2563eb";
+    }
+
+    function sendImageCommand() {
+        const iUrl = document.getElementById('imageUrl').value.trim();
+        const aUrl = document.getElementById('audioUrl').value.trim();
+        if(!iUrl) return alert("تکایە لینکی وێنە دابنێ!");
         
-        const cmd = commandOverride || 'play_playlist';
-        db.ref("system/mcr_data").set({ payload: JSON.stringify(data), command: cmd, timestamp: Date.now() })
-        .then(() => {
-            if(cmd !== 'override') addLog(`فەرمانی [${cmd.toUpperCase()}] نێردرا بۆ سێرڤەر.`, "ok");
+        const payload = JSON.stringify({
+            image: iUrl,
+            audio: aUrl,
+            ticker: document.getElementById('tickerText').value,
+            logo: document.getElementById('logoUrl').value
         });
+        
+        db.ref("system/mcr_data").set({ payload: payload, command: 'play_image', timestamp: Date.now() });
+        document.getElementById('statusText').innerText = "⏸️ ڤیدیۆ ڕاگیرا - وێنە پەخش دەکرێت";
+        document.getElementById('statusText').style.backgroundColor = "#ef4444";
     }
 
-    let adInterval = null;
-    function playAd() {
-        const adUrl = document.getElementById('adUrl').value.trim();
-        const adDur = parseInt(document.getElementById('adDuration').value) || 30;
-
-        if(!adUrl) return alert("تکایە لینکی ڤیدیۆی ڕیکلام دابنێ!");
-
-        db.ref("system/mcr_data").set({
-            payload: JSON.stringify({
-                play: [{ url: adUrl, title: "ڕیکلام (Ad Break)", duration: adDur }],
-                n: "Media Bagera TV",
-                l: document.getElementById('logoUrl').value
-            }),
-            command: 'override',
-            timestamp: Date.now()
+    function updateSettings() {
+        const payload = JSON.stringify({
+            ticker: document.getElementById('tickerText').value,
+            logo: document.getElementById('logoUrl').value,
+            video: document.getElementById('videoUrl').value,
+            image: document.getElementById('imageUrl').value,
+            audio: document.getElementById('audioUrl').value
         });
-
-        addLog(`فاسڵێکی ڕیکلام بۆ ماوەی ${adDur} چرکە پەخش دەکرێت.`, "warn");
-
-        const countElem = document.getElementById('adCountdown');
-        countElem.style.display = 'block';
-        let timeLeft = adDur;
-        countElem.innerText = `گەڕانەوە بۆ خشتە لە: ${timeLeft}s`;
-
-        clearInterval(adInterval);
-        adInterval = setInterval(() => {
-            timeLeft--;
-            if(timeLeft <= 0) {
-                clearInterval(adInterval);
-                countElem.style.display = 'none';
-                masterControl('play_playlist');
-                addLog("ڕیکلام کۆتایی هات، گەڕانەوە بۆ خشتەی سەرەکی.", "ok");
-            } else {
-                countElem.innerText = `گەڕانەوە بۆ خشتە لە: ${timeLeft}s`;
-            }
-        }, 1000);
-    }
-
-    function masterControl(cmd) {
-        clearInterval(adInterval); 
-        document.getElementById('adCountdown').style.display = 'none';
-        
-        saveDataToCloud(cmd);
-        if(cmd === 'play_playlist') {
-            document.getElementById('pgmScreen').src = document.getElementById('pvwScreen').src;
-        }
-    }
-
-    function setLiveStatus(status) {
-        const badge = document.getElementById("airBadge");
-        if (status) {
-            badge.innerText = 'LIVE (ON AIR)'; badge.className = 'badge badge-live active';
-        } else {
-            badge.innerText = 'OFFLINE'; badge.className = 'badge badge-live'; 
-        }
-    }
-
-    function quickInject() {
-        clearInterval(adInterval); 
-        document.getElementById('adCountdown').style.display = 'none';
-        
-        const url = document.getElementById('quickUrl').value.trim();
-        if(!url) return alert("تکایە لینکێک دابنێ!");
-        
-        // هەواڵی بەپەلە وەکو ڕیکلام بە چرکە نییە، بۆیە بە کاتژمێر (نموونە 1 کاتژمێر) دەینێرین
-        db.ref("system/mcr_data").set({
-            payload: JSON.stringify({
-                play: [{ url: url, title: "بەپەلە (Override)", duration: 1 }], 
-                n: "Media Bagera TV",
-                l: document.getElementById('logoUrl').value
-            }),
-            command: 'override',
-            timestamp: Date.now()
-        });
-        document.getElementById('quickUrl').value = '';
-        addLog("لینکێکی بەپەلە (Override) ڕاستەوخۆ نێردرایە سەر شاشە.", "err");
+        db.ref("system/mcr_data").set({ payload: payload, command: 'update_settings', timestamp: Date.now() });
+        alert('ڕێکخستنەکان سەیڤ کران!');
     }
 </script>
 </body>
